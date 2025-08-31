@@ -18,8 +18,10 @@ import ColorPicker from "./elements/addons/ColorPicker";
 import ObsidianWarningBox from "./elements/WarningBox";
 
 // Parsers //
-const renderAddons = (addons?: AddonsArray[]) => {
+const renderAddons = (element: UIElement, addons?: AddonsArray[], stateKeyPrefix?: string) => {
   if (!addons || addons.length === 0) return null;
+
+  const scope = stateKeyPrefix || "global";
   return (
     <AddonContainer className="absolute inset-0 pointer-events-none">
       {addons.map((addon, idx) => {
@@ -30,6 +32,7 @@ const renderAddons = (addons?: AddonsArray[]) => {
                 key={idx}
                 defaultValue={addon.value}
                 className="pointer-events-auto"
+                stateKey={`${scope}:addon:KeyPicker:${element.index}:${idx}`}
               />
             );
 
@@ -40,6 +43,7 @@ const renderAddons = (addons?: AddonsArray[]) => {
                 title={addon.title}
                 defaultValue={addon.value}
                 className="pointer-events-auto"
+                stateKey={`${scope}:addon:ColorPicker:${element.index}:${idx}`}
               />
             );
 
@@ -158,7 +162,7 @@ export const ElementParser: React.FC<{
   return (
     <div className="relative">
       {core}
-      {renderAddons(addonsForElement)}
+      {renderAddons(element, addonsForElement, stateKeyPrefix)}
     </div>
   );
 };

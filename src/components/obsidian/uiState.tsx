@@ -116,3 +116,11 @@ export function useUIValue<T = unknown>(key: string | undefined, initialValue?: 
 
 	return [value, set];
 }
+
+export function useUIColor(key: string | undefined, initialColor?: { r: number; g: number; b: number }) {
+	return useUIValue<{ r: number; g: number; b: number }>(key, initialColor);
+}
+
+export function useUIString(key: string | undefined, initialValue?: string) {
+	return useUIValue<string>(key, initialValue);
+}

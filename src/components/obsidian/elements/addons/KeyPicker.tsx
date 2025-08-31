@@ -2,16 +2,25 @@
 
 import { cn } from "@/lib/utils";
 import Label from "../Label";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useUIState } from "../../uiState";
 
 export default function KeyPicker({
   defaultValue,
   className,
+  stateKey,
 }: {
   defaultValue: string;
   className?: string;
+  stateKey?: string;
 }) {
-  const [value, setValue] = useState<string>(defaultValue);
+  const { state, setState } = useUIState();
+  
+  const storedValue = useMemo(() => 
+    stateKey ? (state[stateKey] as string | undefined) : undefined, 
+    [stateKey, state]
+  );
+  const [value, setValue] = useState<string>(storedValue || defaultValue);
   const [isListening, setIsListening] = useState<boolean>(false);
 
   useEffect(() => {
@@ -20,9 +29,12 @@ export default function KeyPicker({
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      
       const key = e.key;
       const cleaned = key.length === 1 ? key.toUpperCase() : key;
+
       setValue(cleaned);
+      if (stateKey) setState(stateKey, cleaned);
       setIsListening(false);
     };
 
@@ -30,7 +42,14 @@ export default function KeyPicker({
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [isListening]);
+  }, [isListening, stateKey, setState]);
+
+  // Sync with UI state when stored value changes //
+  useEffect(() => {
+    if (stateKey && storedValue && storedValue !== value) {
+      setValue(storedValue);
+    }
+  }, [stateKey, storedValue, value]);
 
   return (
     <div

@@ -2,12 +2,15 @@ import Image from "next/image";
 import { MoveDiagonal2, Move, Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React from "react";
-import * as LucideIcons from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { TabParser } from "./DynamicTab";
 import { UIData } from "./element.types";
 import { IBMMono } from "./fonts";
+
+import * as LucideIcons from "lucide-react";
+type LucideIcon = React.ComponentType<React.ComponentProps<"svg">>;
+const getIcon = (name?: string) => (name && (LucideIcons as unknown as Record<string, LucideIcon>)[name]) || null;
 
 interface ObsidianProps {
 	title: string;
@@ -26,7 +29,7 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 				IBMMono.className
 			)}
 		>
-			<div className="w-full h-[48px] flex flex-row px-0 bg-[rbga(13,13,13,255)]">
+			<div className="w-full h-[48px] flex flex-row px-0 bg-[rbga(13,13,13,1)]">
 				{/* Title */}
 				<div className="flex flex-row items-center justify-center w-[30%] h-full gap-[3px] border-b-[rgb(40,40,40)] border-b">
 					{icon && <Image src={icon} width={30} height={30} alt="logo" />}
@@ -60,16 +63,14 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 					{Object.entries(uiData.tabs)
 						.sort(([, a], [, b]) => a.order - b.order)
 						.map(([tabName, tab], index) => {
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-expect-error
-							const IconTab = LucideIcons[tab.icon];
+							const IconTab = getIcon(tab.icon);
 							return (
 								<TabsTrigger
 									value={tabName}
 									key={index}
 									className="flex flex-row items-center justify-start w-full max-h-[40px] min-h-[40px] border-b-[rgb(40,40,40)] border-b rounded-none py-[11px] px-[12px] data-[state=active]:bg-[rgb(25,25,25)] data-[state=active]:text-white"
 								>
-									{tab.icon && (
+									{IconTab && (
 										<IconTab className="text-[rgb(125,85,255)] h-[calc(100%)] mr-2" />
 									)}
 									<span className="text-[13px] text-opacity-75">{tabName}</span>

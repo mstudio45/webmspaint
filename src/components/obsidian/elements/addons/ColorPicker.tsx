@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import React from "react";
 import { createPortal } from "react-dom";
@@ -10,10 +12,12 @@ export default function ColorPicker({
   title,
   defaultValue,
   className,
+  stateKey,
 }: {
   title: string | null;
   defaultValue: Color3 | null;
   className?: string;
+  stateKey?: string;
 }) {
   const toHex = (value: number): string => {
     const roundedValue = Math.round(value);
@@ -101,7 +105,7 @@ export default function ColorPicker({
   const [isOpen, setIsOpen] = React.useState(false);
 
   const rootRef = React.useRef<HTMLDivElement>(null);
-  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const anchorRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
 
   const [panelPosition, setPanelPosition] = React.useState({ left: 0, top: 0 });
@@ -116,7 +120,11 @@ export default function ColorPicker({
   const hueRef = React.useRef<HTMLDivElement>(null);
 
   // value state //
-  const [value, setValue] = React.useState<Color3 | null>(defaultValue);
+  const storedColor = React.useMemo(() => 
+    stateKey ? (state[stateKey] as Color3 | undefined) : undefined, 
+    [stateKey, state]
+  );
+  const [value, setValue] = React.useState<Color3 | null>(storedColor || defaultValue);
   const [hsv, setHsv] = React.useState<{ h: number; s: number; v: number }>(
     () => rgbToHsv(value || { r: 255, g: 255, b: 255 })
   );
@@ -190,7 +198,7 @@ export default function ColorPicker({
   }, [closePopover]);
 
   // rgb & hex handlers //
-  const onHexChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const onHexChange = React.useCallback<React.ChangeEventHandler<HTMLInputElement>>((e) => {
     const text = e.target.value.trim();
     const hexValue = /^#?([0-9a-fA-F]{6})$/.exec(text);
     if (!hexValue) return;
@@ -201,14 +209,16 @@ export default function ColorPicker({
       g: (hex >> 8) & 0xff,
       b: hex & 0xff,
     } as Color3;
+
     setValue(next);
+    if (stateKey) setState(stateKey, next);
     setHsv((prev) => {
       const converted = rgbToHsv(next);
       return converted.s === 0 ? { ...converted, h: prev.h } : converted;
     });
-  };
+  }, [stateKey, setState, rgbToHsv]);
 
-  const onRgbChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const onRgbChange = React.useCallback<React.ChangeEventHandler<HTMLInputElement>>((e) => {
     const text = e.target.value.trim();
     const rgbValues = /^(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})$/.exec(text);
     if (!rgbValues) return;
@@ -219,22 +229,15 @@ export default function ColorPicker({
 
     const next = { r, g, b } as Color3;
     setValue(next);
+    if (stateKey) setState(stateKey, next);
     setHsv((prev) => {
       const converted = rgbToHsv(next);
       return converted.s === 0 ? { ...converted, h: prev.h } : converted;
     });
-  };
-
-  React.useEffect(() => {
-    if (!value) return;
-    setHsv((prev) => {
-      const converted = rgbToHsv(value);
-      return converted.s === 0 ? { ...converted, h: prev.h } : converted;
-    });
-  }, [value, rgbToHsv]);
+  }, [stateKey, setState, rgbToHsv]);
 
   // SV & Hue handlers //
-  const handleSv = (clientX: number, clientY: number) => {
+  const handleSv = React.useCallback((clientX: number, clientY: number) => {
     const el = svRef.current;
     if (!el) return;
 
@@ -247,10 +250,14 @@ export default function ColorPicker({
 
     const next = { h: hsv.h, s, v };
     setHsv(next);
-    setValue(hsvToRgb(next.h, next.s, next.v));
-  };
 
-  const handleHue = (clientY: number) => {
+    const newColor = hsvToRgb(next.h, next.s, next.v);
+    setValue(newColor);
+
+    if (stateKey) setState(stateKey, newColor);
+  }, [hsv.h, hsvToRgb, stateKey, setState]);
+
+  const handleHue = React.useCallback((clientY: number) => {
     const el = hueRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -261,56 +268,74 @@ export default function ColorPicker({
     const h = (1 - y) * 360;
     const next = { h, s: hsv.s, v: hsv.v };
     setHsv(next);
-    setValue(hsvToRgb(next.h, next.s, next.v));
-  };
 
-  const startDrag =
-    (onMove: (x: number, y: number) => void) =>
-    (e: React.MouseEvent | React.TouchEvent) => {
-      e.preventDefault();
+    const newColor = hsvToRgb(next.h, next.s, next.v);
+    setValue(newColor);
+    if (stateKey) setState(stateKey, newColor);
+  }, [hsv.s, hsv.v, hsvToRgb, stateKey, setState]);
 
-      const move = (ev: MouseEvent | TouchEvent) => {
-        if (ev instanceof TouchEvent) {
-          const t = ev.touches[0] || ev.changedTouches[0];
-          onMove(t.clientX, t.clientY);
-        } else {
-          onMove((ev as MouseEvent).clientX, (ev as MouseEvent).clientY);
-        }
-      };
+  const startDrag = React.useCallback((onMove: (x: number, y: number) => void) => (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
 
-      const up = () => {
-        document.removeEventListener("mousemove", move as EventListener);
-        document.removeEventListener("mouseup", up);
-        document.removeEventListener("touchmove", move as EventListener);
-        document.removeEventListener("touchend", up);
-      };
-
-      document.addEventListener("mousemove", move as EventListener);
-      document.addEventListener("mouseup", up);
-      document.addEventListener("touchmove", move as EventListener, {
-        passive: false,
-      });
-      document.addEventListener("touchend", up, { passive: true });
-
-      if ("changedTouches" in e && e.changedTouches && e.changedTouches[0]) {
-        onMove(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-      } else if ("clientX" in e) {
-        onMove(
-          (e as React.MouseEvent).clientX,
-          (e as React.MouseEvent).clientY
-        );
+    const move = (ev: MouseEvent | TouchEvent) => {
+      if (ev instanceof TouchEvent) {
+        const t = ev.touches[0] || ev.changedTouches[0];
+        onMove(t.clientX, t.clientY);
+      } else {
+        onMove((ev as MouseEvent).clientX, (ev as MouseEvent).clientY);
       }
     };
 
+    const up = () => {
+      document.removeEventListener("mousemove", move as EventListener);
+      document.removeEventListener("mouseup", up);
+      document.removeEventListener("touchmove", move as EventListener);
+      document.removeEventListener("touchend", up);
+    };
+
+    document.addEventListener("mousemove", move as EventListener);
+    document.addEventListener("mouseup", up);
+    document.addEventListener("touchmove", move as EventListener, { passive: false, });
+    document.addEventListener("touchend", up, { passive: true });
+
+    if ("changedTouches" in e && e.changedTouches && e.changedTouches[0]) {
+      onMove(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    } else if ("clientX" in e) {
+      onMove(
+        (e as React.MouseEvent).clientX,
+        (e as React.MouseEvent).clientY
+      );
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!value) return;
+    setHsv((prev) => {
+      const converted = rgbToHsv(value);
+      return converted.s === 0 ? { ...converted, h: prev.h } : converted;
+    });
+  }, [value, rgbToHsv]);
+
+  // Sync with UI state when stored color changes //
+  React.useEffect(() => {
+    if (stateKey && storedColor && (!value || storedColor.r !== value.r || storedColor.g !== value.g || storedColor.b !== value.b)) {
+      setValue(storedColor);
+    }
+  }, [stateKey, storedColor, value]);
+
   return (
     <div ref={rootRef} className="relative pointer-events-auto">
-      <div
+      <button
+        type="button"
         ref={anchorRef}
         className={cn(
           "relative flex justify-center items-center w-[24px] h-[22px] border border-[rgb(40,40,40)] cursor-pointer",
           className
         )}
         style={{ backgroundColor: `rgb(${rgbString})` }}
+        aria-label="Open color picker"
+        aria-haspopup="dialog"
+        aria-expanded={isActive}
         onClick={(e) => {
           e.preventDefault();
           if (isOpen) {
