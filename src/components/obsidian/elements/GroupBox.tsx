@@ -8,7 +8,7 @@ export function Groupbox({ icon: Icon, title, children }: { icon?: React.Element
                 {/* Title */}
                 <div className="flex flex-row items-center w-full border-b border-b-[rgb(40,40,40)]">
                     {Icon && (<Icon className="text-[rgb(125,85,255)] h-[calc(100%)] ml-2 mr-[-5px]" />)}
-                    <span className="text-white text-sm ml-3 mt-1">{title}</span>
+                    <span className="text-white text-[14px] ml-3 mt-1">{title}</span>
                 </div>
             </div>
 

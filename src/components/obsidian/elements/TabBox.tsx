@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ElementParser } from "../DynamicTab";
 import { TabboxTab } from "../element.types";
 
 export default function Tabbox({ tabs, scope }: { tabs: {[key: string]: TabboxTab}, scope: string }) {
-    const tabNames = Object.keys(tabs).sort((a, b) => (tabs[a]?.order ?? 0) - (tabs[b]?.order ?? 0));
+    const tabNames = useMemo(() => 
+        Object.keys(tabs).sort((a, b) => (tabs[a]?.order ?? 0) - (tabs[b]?.order ?? 0)),
+        [tabs]
+    );
     const [activeTab, setActiveTab] = useState(tabNames[0]);
+    const activeTabData = useMemo(() => tabs[activeTab], [tabs, activeTab]);
 
     if (tabNames.length === 0) return null;
-    const activeTabData = tabs[activeTab];
-
     return (
         <div className="mt-1 ml-2 mb-3 rounded-[3px] bg-[rgb(15,15,15)] border border-[rgb(40,40,40)] relative font-normal">
             <div className="w-full h-[38px] flex flex-row bg-[rgb(15,15,15)]">
@@ -37,5 +39,5 @@ export default function Tabbox({ tabs, scope }: { tabs: {[key: string]: TabboxTa
                 ))}
             </div>
         </div>
-    )
-}
+    );
+};
