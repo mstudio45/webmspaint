@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import type { ReactNode } from "react";
 
@@ -9,6 +10,7 @@ type UIStateContextType = {
 	setState: (key: string, value: unknown) => void;
 	resetState: (prefix?: string) => void;
 	subscribe: (key: string, callback: () => void) => () => void;
+	get: (key: string) => unknown;
 };
 
 const UIStateContext = React.createContext<UIStateContextType | null>(null);
@@ -16,9 +18,6 @@ const UIStateContext = React.createContext<UIStateContextType | null>(null);
 export function UIStateProvider({ children }: { children: ReactNode }) {
 	const [state, setStateMap] = React.useState<UIState>({});
 	const stateRef = React.useRef<UIState>({});
-	React.useEffect(() => {
-		stateRef.current = state;
-	}, [state]);
 
 	const listenersRef = React.useRef<Map<string, Set<() => void>>>(new Map());
 	const notify = React.useCallback((key: string) => {
@@ -30,25 +29,30 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const setState = React.useCallback((key: string, value: unknown) => {
-		setStateMap((prev) => ({ ...prev, [key]: value }));
+		const next = { ...stateRef.current, [key]: value };
+		stateRef.current = next;
+		setStateMap(next);
 		notify(key);
 	}, [notify]);
 
 	const resetState = React.useCallback((prefix?: string) => {
 		if (!prefix) {
+			// notify all keys //
+			stateRef.current = {};
 			setStateMap({});
-			// notify all keys
 			for (const key of listenersRef.current.keys()) notify(key);
 			return;
 		}
-		setStateMap((prev) => {
-			const next: UIState = {};
-			for (const [k, v] of Object.entries(prev)) {
-				if (!k.startsWith(prefix)) next[k] = v;
-			}
-			return next;
-		});
-		// notify keys under the prefix
+
+		const prev = stateRef.current;
+		const next: UIState = {};
+		for (const [k, v] of Object.entries(prev)) {
+			if (!k.startsWith(prefix)) next[k] = v;
+		}
+
+		// notify keys under the prefix //
+		stateRef.current = next;
+		setStateMap(next);
 		for (const key of listenersRef.current.keys()) {
 			if (key.startsWith(prefix)) notify(key);
 		}
@@ -67,8 +71,10 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
+	const get = React.useCallback((key: string) => stateRef.current[key], []);
+
 	return (
-		<UIStateContext.Provider value={{ state, setState, resetState, subscribe }}>
+		<UIStateContext.Provider value={{ state, setState, resetState, subscribe, get }}>
 			{children}
 		</UIStateContext.Provider>
 	);
@@ -89,12 +95,12 @@ export function useUIValue<T = unknown>(key: string | undefined, initialValue?: 
 	const ctx = React.useContext(UIStateContext);
 	if (!ctx) throw new Error("useUIValue must be used within UIStateProvider");
 
-	const { state, setState, subscribe } = ctx;
+	const { setState, subscribe, get } = ctx;
 
 	const getSnapshot = React.useCallback(() => {
 		if (!key) return initialValue as T | undefined;
-		return (state[key] as T | undefined) ?? (initialValue as T | undefined);
-	}, [state, key, initialValue]);
+		return (get(key) as T | undefined) ?? (initialValue as T | undefined);
+	}, [get, key, initialValue]);
 
 	const getServerSnapshot = React.useCallback(() => initialValue as T | undefined, [initialValue]);
 

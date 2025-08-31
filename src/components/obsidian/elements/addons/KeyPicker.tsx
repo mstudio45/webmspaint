@@ -17,10 +17,10 @@ export default function KeyPicker({
   const { state, setState } = useUIState();
   
   const storedValue = useMemo(() => 
-    stateKey ? (state[stateKey] as string | undefined) : undefined, 
+    (stateKey ? (state[stateKey] as string | undefined) : undefined),
     [stateKey, state]
   );
-  const [value, setValue] = useState<string>(storedValue || defaultValue);
+  const [value, setValue] = useState<string>(storedValue ?? defaultValue);
   const [isListening, setIsListening] = useState<boolean>(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function KeyPicker({
 
   // Sync with UI state when stored value changes //
   useEffect(() => {
-    if (stateKey && storedValue && storedValue !== value) {
+    if (stateKey && storedValue !== undefined && storedValue !== value) {
       setValue(storedValue);
     }
   }, [stateKey, storedValue, value]);
