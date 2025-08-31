@@ -25,6 +25,8 @@ const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: st
   return (
     <AddonContainer className="absolute inset-0 pointer-events-none">
       {addons.map((addon, idx) => {
+        const addonKey = `${scope}:addon:${addon.type}:${element.index}:${idx}`;
+        
         switch (addon.type) {
           case "KeyPicker":
             return (
@@ -32,7 +34,7 @@ const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: st
                 key={idx}
                 defaultValue={addon.value}
                 className="pointer-events-auto"
-                stateKey={`${scope}:addon:KeyPicker:${element.index}:${idx}`}
+                stateKey={addonKey}
               />
             );
 
@@ -43,7 +45,7 @@ const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: st
                 title={addon.title}
                 defaultValue={addon.value}
                 className="pointer-events-auto"
-                stateKey={`${scope}:addon:ColorPicker:${element.index}:${idx}`}
+                stateKey={addonKey}
               />
             );
 
@@ -55,7 +57,7 @@ const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: st
   );
 };
 
-export const ElementParser: React.FC<{
+export const ElementParser: FC<{
   element: UIElement;
   stateKeyPrefix?: string;
 }> = ({ element, stateKeyPrefix }) => {
@@ -87,7 +89,7 @@ export const ElementParser: React.FC<{
             text={element.text}
             value={element.value}
             options={element.properties.values}
-            multi={(element.multi ?? element.properties.multi) === true}
+            multi={element.properties.multi === true}
             disabledValues={element.properties.disabledValues || []}
             stateKey={`${scope}:el:Dropdown:${element.index}`}
           />
@@ -156,7 +158,7 @@ const TabParserComponent: FC<{ tabData: TabData | null }> = ({
   tabData,
 }) => {
   const { groupboxes, tabboxes, warningBox } = tabData || {};
-  
+
   const leftGroupboxes = useMemo(() =>
     groupboxes?.Left ?
       Object.values(groupboxes.Left).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :

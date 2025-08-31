@@ -62,7 +62,6 @@ export interface ButtonElement extends BaseElement {
 export interface DropdownElement extends BaseElement {
   type: "Dropdown";
   value: string | { [key: string]: boolean };
-  multi: boolean | undefined;
   properties: {
     values: string[];
     disabledValues: string[] | undefined;
