@@ -30,7 +30,7 @@ export const ButtonBase = React.forwardRef<
 			{...props}
 		>
 			{!replacedText ? (
-				<span className={cn("text-center text-white text-sm opacity-50 truncate", className)}>
+				<span className={cn("text-center text-white text-[12px] opacity-50 truncate", className)}>
 					{text}
 				</span>
 			) : (text)}
@@ -51,8 +51,8 @@ export default function Button({
 	if (subButton != undefined) {
 		return (
 			<div className="flex flex-row gap-2">
-				<ButtonBase text={text} />
-				<ButtonBase text={subButton.text} />
+				<ButtonBase text={text} containerClassName="min-w-0 flex-1 flex-shrink" />
+				<ButtonBase text={subButton.text} containerClassName="min-w-0 flex-1 flex-shrink" />
 			</div>
 		);
 	}

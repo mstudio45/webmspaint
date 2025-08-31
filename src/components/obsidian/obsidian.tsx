@@ -82,7 +82,7 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 					<TabsContent
 						value={tabName}
 						key={index}
-						className="w-full max-w-[calc(100%-30%+1.2px)] bg-[#111111] p-0 mt-0"
+						className="flex flex-col w-full max-w-[calc(100%-30%+1.2px)] bg-[#111111] p-0 mt-0 overflow-hidden"
 					>
 						<TabParser tabData={tab} />
 					</TabsContent>

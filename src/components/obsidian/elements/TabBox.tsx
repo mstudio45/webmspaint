@@ -18,7 +18,7 @@ export default function Tabbox({ tabs, scope }: { tabs: {[key: string]: TabboxTa
                         <button
                             key={name}
                             onClick={() => setActiveTab(name)}
-                            className={`flex-1 h-full text-sm ${activeTab == name ? 'text-white' : 'bg-[rgb(40,40,40)] text-white opacity-50'}`}
+                            className={`flex-1 h-full text-[13px] ${activeTab == name ? 'text-white' : 'bg-[rgb(40,40,40)] text-white opacity-50'}`}
                         >
                             {name}
                         </button>

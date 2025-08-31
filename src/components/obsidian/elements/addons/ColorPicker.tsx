@@ -16,7 +16,8 @@ export default function ColorPicker({
   className?: string;
 }) {
   const toHex = (value: number): string => {
-    const clampedValue = Math.max(0, Math.min(255, value));
+    const roundedValue = Math.round(value);
+    const clampedValue = Math.max(0, Math.min(255, roundedValue));
     return clampedValue.toString(16).padStart(2, "0");
   };
 
@@ -43,9 +44,9 @@ export default function ColorPicker({
     const saturation = maxValue === 0 ? 0 : delta / maxValue;
     const value = maxValue;
     return {
-      h: hue * 360,
-      s: saturation,
-      v: value,
+      h: Math.round(hue * 360),
+      s: Math.round(saturation * 100) / 100,
+      v: Math.round(value * 100) / 100,
     };
   }, []);
 
@@ -122,14 +123,14 @@ export default function ColorPicker({
 
   const hexString = React.useMemo(() => {
     const colorValue = value || { r: 255, g: 255, b: 255 };
-    return `#${toHex(colorValue.r)}${toHex(colorValue.g)}${toHex(
-      colorValue.b
+    return `#${toHex(Math.round(colorValue.r))}${toHex(Math.round(colorValue.g))}${toHex(
+      Math.round(colorValue.b)
     )}`;
   }, [value]);
 
   const rgbString = React.useMemo(() => {
     const colorValue = value || { r: 255, g: 255, b: 255 };
-    return `${colorValue.r}, ${colorValue.g}, ${colorValue.b}`;
+    return `${Math.round(colorValue.r)}, ${Math.round(colorValue.g)}, ${Math.round(colorValue.b)}`;
   }, [value]);
 
   // position handler //

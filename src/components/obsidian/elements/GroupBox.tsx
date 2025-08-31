@@ -13,7 +13,7 @@ export function Groupbox({ icon: Icon, title, children }: { icon?: React.Element
             </div>
 
             {/* Content */}
-            <div className="flex flex-col right p-2 gap-2">
+            <div className="flex flex-col right p-2 gap-2 min-h-0">
                 {children}
             </div>
         </div>

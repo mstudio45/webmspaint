@@ -33,9 +33,9 @@ export default function ObsidianWarningBox({
   visible: boolean;
 }) {
   if (!visible) return null;
-
+  if (title && title.includes("Latest Changelog")) return null;
+  
   const scheme = isnormal ? ColorScheme.Normal : ColorScheme.Warning;
-
   return (
     <div
       className="w-[calc(100%-20px)] flex flex-col rounded-[3px] m-2.5 px-2 py-1 border"
