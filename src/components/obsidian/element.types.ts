@@ -24,7 +24,7 @@ export interface ColorPickerAddon {
   title: string;
 }
 
-export type AddonsArray = KeyPickerAddon | ColorPickerAddon;
+export type Addons = KeyPickerAddon | ColorPickerAddon;
 
 // Element Types //
 interface BaseElement {
@@ -40,7 +40,7 @@ export interface ToggleElement extends BaseElement {
   value: boolean;
   properties: {
     risky: boolean;
-    addons?: AddonsArray[] | undefined;
+    addons?: Addons[] | undefined;
   };
 }
 
@@ -48,7 +48,7 @@ export interface LabelElement extends BaseElement {
   type: "Label";
   properties: {
     doesWrap: boolean;
-    addons?: AddonsArray[] | undefined;
+    addons?: Addons[] | undefined;
   };
 }
 

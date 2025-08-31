@@ -10,7 +10,7 @@ import Label from "./elements/Label";
 import Tabbox from "./elements/TabBox";
 import Dropdown from "./elements/Dropdown";
 import Input from "./elements/Input";
-import { TabData, UIElement, AddonsArray } from "./element.types";
+import { TabData, UIElement, Addons } from "./element.types";
 import Slider from "./elements/Slider";
 import KeyPicker from "./elements/addons/KeyPicker";
 import AddonContainer from "./elements/addons/AddonContainer";
@@ -18,7 +18,7 @@ import ColorPicker from "./elements/addons/ColorPicker";
 import ObsidianWarningBox from "./elements/WarningBox";
 
 // Parsers //
-const renderAddons = (element: UIElement, addons?: AddonsArray[], stateKeyPrefix?: string) => {
+const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: string) => {
   if (!addons || addons.length === 0) return null;
 
   const scope = stateKeyPrefix || "global";
@@ -62,7 +62,7 @@ export const ElementParser: React.FC<{
   if ("visible" in element && !element.visible) return null;
 
   const scope = stateKeyPrefix || "global";
-  const addons = (element as unknown as { properties?: { addons?: AddonsArray[] } }).properties?.addons;
+  const addons = (element as unknown as { properties?: { addons?: Addons[] } }).properties?.addons;
   const core = (() => {
     switch (element.type) {
       case "Toggle":
