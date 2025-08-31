@@ -20,8 +20,12 @@ interface ObsidianProps {
 }
 
 export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
-	if (!uiData) return <p>Loading Features...</p>;
+	const sortedTabs = React.useMemo(() => 
+		uiData ? Object.entries(uiData.tabs).sort(([, a], [, b]) => a.order - b.order) : [],
+		[uiData]
+	);
 
+	if (!uiData) return <p>Loading Features...</p>;
 	return (
 		<div
 			className={cn(
@@ -60,26 +64,24 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 				className="h-[calc(100%-69px)] w-full flex flex-row bg-[#111111]"
 			>
 				<TabsList className="h-full border-r-[rgb(40,40,40)] border-r min-w-[calc(30%+1.2px)] flex flex-col justify-start bg-[rgba(15,15,15,255)] rounded-none p-0">
-					{Object.entries(uiData.tabs)
-						.sort(([, a], [, b]) => a.order - b.order)
-						.map(([tabName, tab], index) => {
-							const IconTab = getIcon(tab.icon);
-							return (
-								<TabsTrigger
-									value={tabName}
-									key={index}
-									className="flex flex-row items-center justify-start w-full max-h-[40px] min-h-[40px] border-b-[rgb(40,40,40)] border-b rounded-none py-[11px] px-[12px] data-[state=active]:bg-[rgb(25,25,25)] data-[state=active]:text-white"
-								>
-									{IconTab && (
-										<IconTab className="text-[rgb(125,85,255)] h-[calc(100%)] mr-2" />
-									)}
-									<span className="text-[13px] text-opacity-75">{tabName}</span>
-								</TabsTrigger>
-							);
-						})}
+					{sortedTabs.map(([tabName, tab], index) => {
+						const IconTab = getIcon(tab.icon);
+						return (
+							<TabsTrigger
+								value={tabName}
+								key={index}
+								className="flex flex-row items-center justify-start w-full max-h-[40px] min-h-[40px] border-b-[rgb(40,40,40)] border-b rounded-none py-[11px] px-[12px] data-[state=active]:bg-[rgb(25,25,25)] data-[state=active]:text-white"
+							>
+								{IconTab && (
+									<IconTab className="text-[rgb(125,85,255)] h-[calc(100%)] mr-2" />
+								)}
+								<span className="text-[13px] text-opacity-75">{tabName}</span>
+							</TabsTrigger>
+						);
+					})}
 				</TabsList>
 
-				{Object.entries(uiData.tabs).map(([tabName, tab], index) => (
+				{sortedTabs.map(([tabName, tab], index) => (
 					<TabsContent
 						value={tabName}
 						key={index}

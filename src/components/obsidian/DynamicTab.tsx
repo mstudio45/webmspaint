@@ -1,5 +1,6 @@
 import React from "react";
 
+import { TabData, UIElement, Addons } from "./element.types";
 import { Groupbox } from "./elements/GroupBox";
 import { TabContainer, TabLeft, TabRight } from "./elements/Tab";
 import Divider from "./elements/Divider";
@@ -10,7 +11,6 @@ import Label from "./elements/Label";
 import Tabbox from "./elements/TabBox";
 import Dropdown from "./elements/Dropdown";
 import Input from "./elements/Input";
-import { TabData, UIElement, Addons } from "./element.types";
 import Slider from "./elements/Slider";
 import KeyPicker from "./elements/addons/KeyPicker";
 import AddonContainer from "./elements/addons/AddonContainer";
@@ -152,12 +152,33 @@ export const ElementParser: React.FC<{
   );
 };
 
-export const TabParser: React.FC<{ tabData: TabData | null }> = ({
+const TabParserComponent: React.FC<{ tabData: TabData | null }> = ({
   tabData,
 }) => {
+  const { groupboxes, tabboxes, warningBox } = tabData || {};
+  
+  const leftGroupboxes = React.useMemo(() =>
+    groupboxes?.Left ?
+      Object.values(groupboxes.Left).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
+      []
+    , [groupboxes?.Left]);
+
+  const rightGroupboxes = React.useMemo(() =>
+    groupboxes?.Right ?
+      Object.values(groupboxes.Right).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
+      []
+    , [groupboxes?.Right]);
+
+  const leftTabboxes = React.useMemo(() =>
+    tabboxes?.Left ? Object.values(tabboxes.Left) : []
+    , [tabboxes?.Left]);
+
+  const rightTabboxes = React.useMemo(() =>
+    tabboxes?.Right ? Object.values(tabboxes.Right) : []
+    , [tabboxes?.Right]);
+
   if (!tabData) return null;
 
-  const { groupboxes, tabboxes, warningBox } = tabData;
   return (
     <>
       {warningBox && (
@@ -171,54 +192,49 @@ export const TabParser: React.FC<{ tabData: TabData | null }> = ({
       )}
       <TabContainer>
         <TabLeft>
-          {tabboxes?.Left &&
-            Object.values(tabboxes.Left).map((tabbox) => (
-              <Tabbox
-                key={tabbox.name}
-                tabs={tabbox.tabs}
-                scope={`tab:${tabData.name}:left:tabbox:${tabbox.name}`}
-              />
-            ))}
-          {groupboxes?.Left &&
-            Object.values(groupboxes.Left)
-              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map((gb) => (
-                <Groupbox key={gb.name} title={gb.name}>
-                  {gb.elements.map((el) => (
-                    <ElementParser
-                      key={`left-gb-${gb.name}-${el.index}`}
-                      element={el}
-                      stateKeyPrefix={`tab:${tabData.name}:left:groupbox:${gb.name}`}
-                    />
-                  ))}
-                </Groupbox>
+          {leftTabboxes.map((tabbox) => (
+            <Tabbox
+              key={tabbox.name}
+              tabs={tabbox.tabs}
+              scope={`tab:${tabData.name}:left:tabbox:${tabbox.name}`}
+            />
+          ))}
+          {leftGroupboxes.map((gb) => (
+            <Groupbox key={gb.name} title={gb.name}>
+              {gb.elements.map((el) => (
+                <ElementParser
+                  key={`left-gb-${gb.name}-${el.index}`}
+                  element={el}
+                  stateKeyPrefix={`gb:${tabData.name}:left:groupbox:${gb.name}`}
+                />
               ))}
+            </Groupbox>
+          ))}
         </TabLeft>
         <TabRight>
-          {tabboxes?.Right &&
-            Object.values(tabboxes.Right).map((tabbox) => (
-              <Tabbox
-                key={tabbox.name}
-                tabs={tabbox.tabs}
-                scope={`tab:${tabData.name}:right:tabbox:${tabbox.name}`}
-              />
-            ))}
-          {groupboxes?.Right &&
-            Object.values(groupboxes.Right)
-              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map((gb) => (
-                <Groupbox key={gb.name} title={gb.name}>
-                  {gb.elements.map((el) => (
-                    <ElementParser
-                      key={`right-gb-${gb.name}-${el.index}`}
-                      element={el}
-                      stateKeyPrefix={`tab:${tabData.name}:right:groupbox:${gb.name}`}
-                    />
-                  ))}
-                </Groupbox>
+          {rightTabboxes.map((tabbox) => (
+            <Tabbox
+              key={tabbox.name}
+              tabs={tabbox.tabs}
+              scope={`tab:${tabData.name}:right:tabbox:${tabbox.name}`}
+            />
+          ))}
+          {rightGroupboxes.map((gb) => (
+            <Groupbox key={gb.name} title={gb.name}>
+              {gb.elements.map((el) => (
+                <ElementParser
+                  key={`right-gb-${gb.name}-${el.index}`}
+                  element={el}
+                  stateKeyPrefix={`gb:${tabData.name}:right:groupbox:${gb.name}`}
+                />
               ))}
+            </Groupbox>
+          ))}
         </TabRight>
       </TabContainer>
     </>
   );
 };
+
+TabParserComponent.displayName = "TabParser";
+export const TabParser = React.memo(TabParserComponent);
