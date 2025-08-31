@@ -62,22 +62,7 @@ export const ElementParser: React.FC<{
   if ("visible" in element && !element.visible) return null;
 
   const scope = stateKeyPrefix || "global";
-  let addonsForElement: AddonsArray[] | undefined = undefined;
-
-  switch (element.type) {
-    case "Toggle":
-      addonsForElement = element.properties?.addons;
-      break;
-
-    case "Label":
-      addonsForElement = element.properties?.addons;
-      break;
-
-    default:
-      addonsForElement = undefined;
-      break;
-  }
-
+  const addons = (element as unknown as { properties?: { addons?: AddonsArray[] } }).properties?.addons;
   const core = (() => {
     switch (element.type) {
       case "Toggle":
@@ -162,7 +147,7 @@ export const ElementParser: React.FC<{
   return (
     <div className="relative">
       {core}
-      {renderAddons(element, addonsForElement, stateKeyPrefix)}
+      {renderAddons(element, addons, stateKeyPrefix)}
     </div>
   );
 };
