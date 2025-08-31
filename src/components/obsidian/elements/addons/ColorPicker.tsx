@@ -106,9 +106,9 @@ const colorUtils = {
 
 const useColorState = (defaultValue: Color3 | null, stateKey?: string) => {
   const { state, setState } = useUIState();
-  
-  const storedColor = React.useMemo(() => 
-    stateKey ? (state[stateKey] as Color3 | undefined) : undefined, 
+
+  const storedColor = React.useMemo(() =>
+    stateKey ? (state[stateKey] as Color3 | undefined) : undefined,
     [stateKey, state]
   );
 
@@ -119,7 +119,7 @@ const useColorState = (defaultValue: Color3 | null, stateKey?: string) => {
   // Keep refs to current values for drag operations //
   const colorRef = React.useRef(color);
   const hsvRef = React.useRef(hsv);
-  
+
   React.useEffect(() => {
     colorRef.current = color;
     hsvRef.current = hsv;
@@ -131,7 +131,7 @@ const useColorState = (defaultValue: Color3 | null, stateKey?: string) => {
       const newHsv = colorUtils.rgbToHsv(newColor);
       return newHsv.s === 0 ? { ...newHsv, h: prevHsv.h } : newHsv;
     });
-    
+
     if (stateKey && updateUIState) {
       setState(stateKey, newColor);
     }
@@ -141,7 +141,7 @@ const useColorState = (defaultValue: Color3 | null, stateKey?: string) => {
     setHsv(newHsv);
     const newColor = colorUtils.hsvToRgb(newHsv.h, newHsv.s, newHsv.v);
     setColor(newColor);
-    
+
     if (stateKey && updateUIState) {
       setState(stateKey, newColor);
     }
@@ -162,7 +162,7 @@ const useColorState = (defaultValue: Color3 | null, stateKey?: string) => {
         setHsv(colorUtils.rgbToHsv(storedColor));
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateKey, storedColor]); // dont add color here, it will create an inf loop //
 
   return {
@@ -222,7 +222,7 @@ const usePositioning = (
 
   const updatePosition = React.useCallback(() => {
     if (!anchorRef.current) return;
-    
+
     const rect = anchorRef.current.getBoundingClientRect();
     let left = Math.round(rect.left + window.scrollX);
     let top = Math.round(rect.bottom + window.scrollY + GAP);
@@ -239,7 +239,7 @@ const usePositioning = (
 
     const events = ["resize", "scroll"];
     events.forEach(event => window.addEventListener(event, updatePosition, true));
-    
+
     return () => {
       events.forEach(event => window.removeEventListener(event, updatePosition, true));
     };
@@ -441,7 +441,7 @@ export default function ColorPicker({
               >
                 <div
                   className="absolute left-[-3px] w-[18px] h-[3px] border border-black bg-white pointer-events-none"
-                  style={{ 
+                  style={{
                     top: `${(1 - hsv.h / 360) * 100}%`,
                     transform: "translateY(-50%)"
                   }}

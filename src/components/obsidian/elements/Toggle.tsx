@@ -37,12 +37,12 @@ export default function Toggle({
         if (stateKey) setExternalChecked(next);
       }}
     >
-      <div className="absolute w-[22px] h-[22px] rounded-[3px] bg-[rgb(25,25,25)] hover:bg-[rgb(35,35,35)] border-[rgb(40,40,40)] border">
+      <button type="button" className="absolute left-0 w-[22px] h-[22px] rounded-[3px] bg-[rgb(25,25,25)] hover:bg-[rgb(35,35,35)] border-[rgb(40,40,40)] border">
         <CheckIcon
           className={`w-[16px] h-[16px] m-[2px] transition-opacity`}
           style={{ opacity: isChecked == true ? 1 : 0 }}
         />
-      </div>
+      </button>
 
       <span
         className={`ml-[28px] text-left block text-sm select-none opacity-${
