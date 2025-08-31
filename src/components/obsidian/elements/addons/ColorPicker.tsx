@@ -352,6 +352,8 @@ export default function ColorPicker({
           <div onMouseDown={closePopover}>
             <div
               ref={panelRef}
+              role="dialog"
+              aria-modal="false"
               className="absolute w-[240px] p-[6px] pt-[2px] bg-[rgb(15,15,15)] border border-[rgb(40,40,40)] origin-top-left scale-[0.8] max-sm:scale-[0.5] md:scale-90 lg:scale-100"
               style={{
                 left: panelPosition.left,
