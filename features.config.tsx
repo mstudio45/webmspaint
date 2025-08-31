@@ -1,152 +1,160 @@
-/* eslint-disable @next/next/no-img-element */
 export const LatestBuild = "0.2.9.9";
 
+function GetUIDataURL(path: string) {
+  return `https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/${encodeURIComponent(
+    path
+  )}.json`;
+}
+
+interface Mapping {
+  Game: string; // Footer text basically
+  DataURL: string;
+}
+
+function SetupGameMapping(
+  name: string,
+  data:
+    | {
+        [key: string]: Mapping;
+      }
+    | Mapping
+) {
+  const IsSingleGame = "Game" in data;
+
+  if (IsSingleGame) {
+    return {
+      [name]: {
+        [name]: data,
+      },
+    };
+  }
+
+  return {
+    [name]: data,
+  };
+}
+
 export const MenuMapping = {
-  DOORS: {
+  ...SetupGameMapping("DOORS", {
     "The Hotel": {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/doors/hotel.json",
+      DataURL: GetUIDataURL("doors/hotel"),
     },
 
     Backdoor: {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/backdoor"),
     },
 
     "The Mines": {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/doors/mines.json",
+      DataURL: GetUIDataURL("doors/mines"),
     },
 
     "The Rooms": {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/rooms"),
     },
 
     "Hotel-": {
       Game: "DOORS (Doors)",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/hotelminus"),
     },
 
     "Super Hard Mode": {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/superhardmode"),
     },
 
     "Retro Mode": {
       Game: "DOORS",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/retromode"),
     },
 
     Lobby: {
       Game: "DOORS (Lobby)",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("doors/lobby"),
     },
-  },
+  }),
 
-  Fisch: {
-    Fisch: {
-      Game: "Fisch",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("Fisch", {
+    Game: "Fisch",
+    DataURL: GetUIDataURL("fisch"),
+  }),
 
-  "R&D": {
-    "R&D": {
-      Game: "R&D",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("R&D", {
+    Game: "R&D",
+    DataURL: GetUIDataURL("R&D"),
+  }),
 
-  Pressure: {
+  ...SetupGameMapping("Pressure", {
     Pressure: {
       Game: "Pressure",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("pressure/main"),
     },
 
     Raveyard: {
       Game: "Pressure",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("pressure/raveyard"),
+    },
+
+    Hunted: {
+      Game: "Pressure",
+      DataURL: GetUIDataURL("pressure/hunted"),
+    },
+
+    "Three Nights at the Blacksite": {
+      Game: "Pressure",
+      DataURL: GetUIDataURL("pressure/threenightsatblacksite"),
     },
 
     Lobby: {
       Game: "Pressure (Lobby)",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("pressure/lobby"),
     },
-  },
+  }),
 
-  "3008": {
-    "3008": {
-      Game: "3008",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("3008", {
+    Game: "3008",
+    DataURL: GetUIDataURL("3008"),
+  }),
 
-  BABFT: {
-    "Build A Boat For Treasure": {
-      Game: "Build A Boat For Treasure",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("Build A Boat For Treasure", {
+    Game: "Build A Boat For Treasure",
+    DataURL: GetUIDataURL("babft"),
+  }),
 
-  Grace: {
-    Grace: {
-      Game: "Grace [BETA]",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("Grace", {
+    Game: "Grace [BETA]",
+    DataURL: GetUIDataURL("grace"),
+  }),
 
-  "Murder Mystery 2": {
-    "Murder Mystery 2": {
-      Game: "Murder Mystery 2 [BETA]",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("Murder Mystery 2", {
+    Game: "Murder Mystery 2 [BETA]",
+    DataURL: GetUIDataURL("mm2"),
+  }),
 
-  "Word Bomb": {
-    "Word Bomb": {
-      Game: "Word Bomb",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
-    },
-  },
+  ...SetupGameMapping("Word Bomb", {
+    Game: "Word Bomb",
+    DataURL: GetUIDataURL("wordbomb"),
+  }),
 
-  Notoriety: {
+  ...SetupGameMapping("Notoriety", {
     Notoriety: {
       Game: "Notoriety [BETA]",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("notoriety/main"),
     },
 
     Lobby: {
       Game: "Notoriety [BETA]",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("notoriety/lobby"),
     },
-  },
+  }),
 
   Universal: {
     Universal: {
       Game: "Universal",
-      DataURL:
-        "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/Universal.json",
+      DataURL: GetUIDataURL("universal"),
     },
   },
 };
