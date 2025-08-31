@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import Label from "./Label";
 
 const ColorScheme = {
@@ -15,29 +14,34 @@ const ColorScheme = {
     Title: "#ffffff",
     Text: "#ffffff",
   },
-};
+} as const;
 
 const MAX_HEIGHT_PX = 120;
 
 export default function ObsidianWarningBox({
   text,
   title,
-  isnormal,
-  locksize,
+  isNormal,
+  lockSize,
   visible,
 }: {
   text: string;
   title: string;
-  isnormal: boolean;
-  locksize: boolean;
+  isNormal: boolean;
+  lockSize: boolean;
   visible: boolean;
 }) {
   if (!visible) return null;
   if (title && title.includes("Latest Changelog")) return null;
   
-  const scheme = isnormal ? ColorScheme.Normal : ColorScheme.Warning;
+  const scheme = isNormal ? ColorScheme.Normal : ColorScheme.Warning;
+  const role = isNormal ? "note" : "alert";
+  const ariaLive = isNormal ? "polite" : "assertive";
+
   return (
     <div
+      role={role}
+      aria-live={ariaLive}
       className="w-[calc(100%-20px)] flex flex-col rounded-[3px] m-2.5 px-2 py-1 border"
       style={{ backgroundColor: scheme.Background, borderColor: scheme.Border }}
     >
@@ -45,11 +49,11 @@ export default function ObsidianWarningBox({
         className="text-[12px] font-normal select-text"
         style={{ color: scheme.Title }}
       >
-        {title || (isnormal ? "INFO" : "WARNING")}
+        {title || (isNormal ? "INFO" : "WARNING")}
       </Label>
       <div
-        className={locksize ? "overflow-y-auto" : "overflow-visible"}
-        style={locksize ? { maxHeight: MAX_HEIGHT_PX } : undefined}
+        className={lockSize ? "overflow-y-auto" : "overflow-visible"}
+        style={lockSize ? { maxHeight: MAX_HEIGHT_PX } : undefined}
       >
         <Label className="text-[13px] font-normal">{text}</Label>
       </div>

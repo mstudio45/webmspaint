@@ -176,8 +176,8 @@ export const TabParser: React.FC<{ tabData: TabData | null }> = ({
           text={warningBox.Text}
           title={warningBox.Title}
           visible={warningBox.Visible}
-          isnormal={warningBox.IsNormal}
-          locksize={warningBox.LockSize}
+          isNormal={warningBox.IsNormal}
+          lockSize={warningBox.LockSize}
         />
       )}
       <TabContainer>
