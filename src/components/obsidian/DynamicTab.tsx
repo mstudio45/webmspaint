@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useMemo, FC } from "react";
 
 import { TabData, UIElement, Addons } from "./element.types";
 import { Groupbox } from "./elements/GroupBox";
@@ -152,28 +152,28 @@ export const ElementParser: React.FC<{
   );
 };
 
-const TabParserComponent: React.FC<{ tabData: TabData | null }> = ({
+const TabParserComponent: FC<{ tabData: TabData | null }> = ({
   tabData,
 }) => {
   const { groupboxes, tabboxes, warningBox } = tabData || {};
   
-  const leftGroupboxes = React.useMemo(() =>
+  const leftGroupboxes = useMemo(() =>
     groupboxes?.Left ?
       Object.values(groupboxes.Left).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
       []
     , [groupboxes?.Left]);
 
-  const rightGroupboxes = React.useMemo(() =>
+  const rightGroupboxes = useMemo(() =>
     groupboxes?.Right ?
       Object.values(groupboxes.Right).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
       []
     , [groupboxes?.Right]);
 
-  const leftTabboxes = React.useMemo(() =>
+  const leftTabboxes = useMemo(() =>
     tabboxes?.Left ? Object.values(tabboxes.Left) : []
     , [tabboxes?.Left]);
 
-  const rightTabboxes = React.useMemo(() =>
+  const rightTabboxes = useMemo(() =>
     tabboxes?.Right ? Object.values(tabboxes.Right) : []
     , [tabboxes?.Right]);
 
@@ -237,4 +237,4 @@ const TabParserComponent: React.FC<{ tabData: TabData | null }> = ({
 };
 
 TabParserComponent.displayName = "TabParser";
-export const TabParser = React.memo(TabParserComponent);
+export const TabParser = memo(TabParserComponent);

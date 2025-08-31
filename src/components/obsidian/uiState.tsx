@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 type UIState = Record<string, unknown>;
 
 type UIStateContextType = {
-	state: UIState;
+	state: Readonly<UIState>;
 	setState: (key: string, value: unknown) => void;
 	resetState: (prefix?: string) => void;
 	subscribe: (key: string, callback: () => void) => () => void;
@@ -24,11 +24,20 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 		const set = listenersRef.current.get(key);
 		if (!set) return;
 		for (const cb of Array.from(set)) {
-			try { cb(); } catch {}
+			try { cb(); }
+			catch (err) {
+				if (process.env.NODE_ENV !== "production") {
+					// eslint-disable-next-line no-console
+					console.error("[UIState.notify] listener threw:", err);
+				}
+			}
 		}
 	}, []);
 
 	const setState = React.useCallback((key: string, value: unknown) => {
+		const prev = (stateRef.current as Record<string, unknown>)[key];
+		if (Object.is(prev, value)) return;
+
 		const next = { ...stateRef.current, [key]: value };
 		stateRef.current = next;
 		setStateMap(next);
@@ -36,7 +45,7 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 	}, [notify]);
 
 	const resetState = React.useCallback((prefix?: string) => {
-		if (!prefix) {
+		if (prefix === undefined) {
 			// notify all keys //
 			stateRef.current = {};
 			setStateMap({});
@@ -59,15 +68,16 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 	}, [notify]);
 
 	const subscribe = React.useCallback((key: string, callback: () => void) => {
-		let set = listenersRef.current.get(key);
-		if (!set) {
-			set = new Set();
-			listenersRef.current.set(key, set);
+		let listeners = listenersRef.current.get(key);
+		if (!listeners) {
+			listeners = new Set();
+			listenersRef.current.set(key, listeners);
 		}
-		set.add(callback);
+
+		listeners.add(callback);
 		return () => {
-			set?.delete(callback);
-			if (set && set.size === 0) listenersRef.current.delete(key);
+			listeners?.delete(callback);
+			if (listeners && listeners.size === 0) listenersRef.current.delete(key);
 		};
 	}, []);
 
@@ -91,7 +101,7 @@ export function useResetUIState() {
 	return resetState;
 }
 
-export function useUIValue<T = unknown>(key: string | undefined, initialValue?: T): [T | undefined, (value: T) => void] {
+export function useUIValue<T = unknown>(key: string | undefined, initialValue?: T): [T | undefined, (value: T | ((prev: T | undefined) => T)) => void] {
 	const ctx = React.useContext(UIStateContext);
 	if (!ctx) throw new Error("useUIValue must be used within UIStateProvider");
 
@@ -105,7 +115,7 @@ export function useUIValue<T = unknown>(key: string | undefined, initialValue?: 
 	const getServerSnapshot = React.useCallback(() => initialValue as T | undefined, [initialValue]);
 
 	const subscribeKey = React.useCallback((onStoreChange: () => void) => {
-		if (!key) return () => {};
+		if (!key) return () => { };
 		return subscribe(key, onStoreChange);
 	}, [subscribe, key]);
 
@@ -115,10 +125,13 @@ export function useUIValue<T = unknown>(key: string | undefined, initialValue?: 
 		getServerSnapshot as unknown as () => T | undefined
 	);
 
-	const set = React.useCallback((v: T) => {
+	const set = React.useCallback((v: T | ((prev: T | undefined) => T)) => {
 		if (!key) return;
-		setState(key, v);
-	}, [setState, key]);
+		const next = typeof v === "function"
+			? (v as (prev: T | undefined) => T)((get(key) as T | undefined) ?? (initialValue as T | undefined))
+			: v;
+		setState(key, next as T);
+	}, [setState, key, get, initialValue]);
 
 	return [value, set];
 }

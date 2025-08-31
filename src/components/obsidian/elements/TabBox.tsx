@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ElementParser } from "../DynamicTab";
 import { TabboxTab } from "../element.types";
 
@@ -7,8 +7,14 @@ export default function Tabbox({ tabs, scope }: { tabs: {[key: string]: TabboxTa
         Object.keys(tabs).sort((a, b) => (tabs[a]?.order ?? 0) - (tabs[b]?.order ?? 0)),
         [tabs]
     );
+    
     const [activeTab, setActiveTab] = useState(tabNames[0]);
     const activeTabData = useMemo(() => tabs[activeTab], [tabs, activeTab]);
+    useEffect(() => {
+        if (tabNames.length && (!activeTab || !tabs[activeTab])) {
+            setActiveTab(tabNames[0]);
+        }
+    }, [tabNames, tabs, activeTab]);
 
     if (tabNames.length === 0) return null;
     return (
@@ -30,7 +36,7 @@ export default function Tabbox({ tabs, scope }: { tabs: {[key: string]: TabboxTa
 
             {/* Content */}
             <div className="flex flex-col right p-2 gap-2">
-                {activeTabData.elements.map(el => (
+                {activeTabData?.elements?.map(el => (
                     <ElementParser
                         key={`${activeTab}-${el.index}`}
                         element={el}

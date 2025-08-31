@@ -48,6 +48,7 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 							<input
 								type="text"
 								placeholder="Search"
+								aria-label="Search"
 								className="w-full mt-[4px] text-center text-[13.5px] text-[#fff] bg-transparent placeholder-[#5f5f5f] outline-none"
 							/>
 						</div>
@@ -63,7 +64,7 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 				defaultValue={"Home"}
 				className="h-[calc(100%-69px)] w-full flex flex-row bg-[#111111]"
 			>
-				<TabsList className="h-full border-r-[rgb(40,40,40)] border-r min-w-[calc(30%+1.2px)] flex flex-col justify-start bg-[rgba(15,15,15,255)] rounded-none p-0">
+				<TabsList className="h-full border-r-[rgb(40,40,40)] border-r min-w-[calc(30%+1.2px)] flex flex-col justify-start bg-[rgba(15,15,15,1)] rounded-none p-0">
 					{sortedTabs.map(([tabName, tab], index) => {
 						const IconTab = getIcon(tab.icon);
 						return (
@@ -73,7 +74,7 @@ export function Obsidian({ title, icon, footer, uiData }: ObsidianProps) {
 								className="flex flex-row items-center justify-start w-full max-h-[40px] min-h-[40px] border-b-[rgb(40,40,40)] border-b rounded-none py-[11px] px-[12px] data-[state=active]:bg-[rgb(25,25,25)] data-[state=active]:text-white"
 							>
 								{IconTab && (
-									<IconTab className="text-[rgb(125,85,255)] h-[calc(100%)] mr-2" />
+									<IconTab className="text-[rgb(125,85,255)] h-full mr-2" />
 								)}
 								<span className="text-[13px] text-opacity-75">{tabName}</span>
 							</TabsTrigger>
