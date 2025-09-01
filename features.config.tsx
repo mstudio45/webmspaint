@@ -1,9 +1,16 @@
 export const LatestBuild = "0.2.9.9";
 
 function GetUIDataURL(path: string) {
-  return `https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata/${encodeURIComponent(
-    path
-  )}.json`;
+  const base =
+    "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/uidata";
+
+  const parts = path
+    .split("/")
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join("/");
+
+  return `${base}/${parts}.json`;
 }
 
 interface Mapping {
