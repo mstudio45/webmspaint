@@ -41,8 +41,6 @@ function SetupGameMapping(
   };
 }
 
-
-
 export const MenuMapping = {
   ...SetupGameMapping("DOORS", {
     "The Hotel": {
@@ -169,7 +167,7 @@ export const MenuMapping = {
 
   ...SetupGameMapping("Dead Rails", {
     Game: "Dead Rails [BETA]",
-    DataURL: GetUIDataURL("bgsi"),
+    DataURL: GetUIDataURL("deadrails"),
   }),
 
   ...SetupGameMapping("Grow A Garden", {
