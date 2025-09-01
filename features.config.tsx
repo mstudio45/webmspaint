@@ -56,6 +56,8 @@ export const MenuMapping = {
       DataURL: GetUIDataURL("doors/rooms"),
     },
 
+    /*
+    TODO: uncomment when they are no longer under maintenance
     "Hotel-": {
       Game: "DOORS (Doors)",
       DataURL: GetUIDataURL("doors/hotelminus"),
@@ -69,7 +71,7 @@ export const MenuMapping = {
     "Retro Mode": {
       Game: "DOORS",
       DataURL: GetUIDataURL("doors/retromode"),
-    },
+    },*/
 
     Lobby: {
       Game: "DOORS (Lobby)",
@@ -98,13 +100,13 @@ export const MenuMapping = {
       DataURL: GetUIDataURL("pressure/raveyard"),
     },
 
-    Hunted: {
+    "The Hunted": {
       Game: "Pressure",
       DataURL: GetUIDataURL("pressure/hunted"),
     },
 
     "Three Nights at the Blacksite": {
-      Game: "Pressure",
+      Game: "Pressure (Three Nights at the Blacksite)",
       DataURL: GetUIDataURL("pressure/threenightsatblacksite"),
     },
 
@@ -151,10 +153,23 @@ export const MenuMapping = {
     },
   }),
 
-  Universal: {
-    Universal: {
-      Game: "Universal",
-      DataURL: GetUIDataURL("universal"),
-    },
-  },
+  ...SetupGameMapping("Bubble Gum Simulator Infinity", {
+    Game: "Bubble Gum Simulator Infinity [BETA]",
+    DataURL: GetUIDataURL("bgsi"),
+  }),
+
+  ...SetupGameMapping("Dead Rails", {
+    Game: "Dead Rails [BETA]",
+    DataURL: GetUIDataURL("bgsi"),
+  }),
+
+  ...SetupGameMapping("Grow A Garden", {
+    Game: "Grow A Garden [BETA]",
+    DataURL: GetUIDataURL("gag"),
+  }),
+
+  ...SetupGameMapping("Universal", {
+    Game: "Universal",
+    DataURL: GetUIDataURL("universal"),
+  }),
 };
