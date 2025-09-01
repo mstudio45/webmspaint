@@ -12,12 +12,6 @@ import * as LucideIcons from "lucide-react";
 type LucideIcon = React.ComponentType<React.ComponentProps<"svg">>;
 const getIcon = (name?: string) => (name && (LucideIcons as unknown as Record<string, LucideIcon>)[name]) || null;
 
-interface TabProps {
-    title: string;
-    icon?: React.ElementType;
-    tabContent: React.ReactNode;
-}
-
 interface ObsidianProps {
 	title: string;
 	icon?: string;
