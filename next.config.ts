@@ -2,6 +2,8 @@ import { type NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Cache optimized images longer to reduce optimizer hits
+    minimumCacheTTL: 2592000, // 30 days
     remotePatterns: [
       // Add Discord domain for avatars
       {
