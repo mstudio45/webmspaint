@@ -41,6 +41,13 @@ import { ShineBorder } from "./magicui/shine-border";
 import { Separator } from "@radix-ui/react-separator";
 import { ClientCodeBlock, getScriptCode } from "./codeblock";
 import { CopyButtonWithText } from "./copy-button";
+import { Input } from "./ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MiniDashboardCardProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,12 +68,62 @@ export default function MiniDashboardCard({
   const router = useRouter();
   const [hardwareIdDialog, setHardwareIdDialog] = React.useState(false);
   const [getScriptDialog, setGetScriptDialog] = React.useState(false);
+  const [getSignOutDialog, setSignOutDialog] = React.useState(false);
+  const [getRedeemDialog, setRedeemDialog] = React.useState(false);
+  const [getGiftKeyDialog, setGiftKeyDialog] = React.useState(false);
 
+  const [key, setKey] = React.useState<string | null>(null);
+  const [getRedeemError, setRedeemError] = React.useState<string | null>(null);
+
+  const validateKey = () => {
+    if (!key) {
+      return "Please enter a key.";
+    }
+
+    if (key.startsWith("https://www.mspaint.cc/purchase/completed?serial=")) {
+      try {
+        const url = new URL(key);
+        const serial = url.searchParams.get("serial");
+        if (!serial || serial.length < 10) {
+          return "Invalid serial in URL.";
+        }
+        return null; //valid
+      } catch {
+        return "Invalid URL format.";
+      }
+    }
+
+    const codeRegex = /^(\w|\d){16}$/; // adjust length as needed
+    if (!codeRegex.test(key)) {
+      return "Invalid key format.";
+    }
+
+    return null; // valid
+  };
+
+  const handleRedeem = () => {
+    const errorMsg = validateKey();
+    if (errorMsg) {
+      setRedeemError(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+
+    setRedeemError(null);
+    toast.info("Redirected to a new page.", );
+
+    const formatKey = (key ?? "invalid");
+    if (formatKey.startsWith("https://www.mspaint.cc/purchase/completed?serial=")) {
+      window.open(formatKey, "_blank");
+    } else {
+      window.open(`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(formatKey)}`, "_blank");
+    }
+  };
+  
   if (!session || !session.user) {
     router.push("/sign-in");
     return null;
   }
-
 
   const expirationDate = normalizeEpochMs(subscription?.expires_at) ?? 0;
   const userStatus: string = subscription ? subscription.user_status : "unlink";
@@ -409,7 +466,7 @@ export default function MiniDashboardCard({
                           className={cn(
                             "w-full max-w-xs bg-red-600 hover:bg-red-700 cursor-pointer"
                           )}
-                          onClick={signout}
+                          onClick={() => setSignOutDialog(true)}
                         >
                           Sign Out
                         </Button>
@@ -432,26 +489,128 @@ export default function MiniDashboardCard({
                       {(!isBanned) && (
                         <>
                           {isLifetime ? (
-                            <RainbowButton disabled className="w-full">
-                              {isExpired ? "Buy" : "Extend"} Subscription
-                            </RainbowButton>
+                            <>
+                              <RainbowButton 
+                                className="w-full"
+                                onClick={() => setGiftKeyDialog(true)}
+                              >
+                                Send as Gift
+                              </RainbowButton>
+
+                              <Dialog
+                                  open={getGiftKeyDialog}
+                                  onOpenChange={setGiftKeyDialog}
+                                >
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      🎁 Gift mspaint key
+                                    </DialogTitle>
+                                    <div className="text-muted-foreground text-xs sm:text-sm">
+                                      <p>
+                                        Thank you for purchasing mspaint lifetime.<br/>
+                                        If you&apos;re feeling generous you can buy mspaint keys for your friends, or giveaways!<br/>
+                                      </p>
+                                    </div>
+                                  </DialogHeader>
+                                  <div className="flex flex-row gap-2">
+                                    <p className="mt-2 text-sm text-gray-400">
+                                      You can buy it here
+                                    </p>
+                                    <Link href="https://www.mspaint.cc/shop">
+                                      <Button variant="secondary">Buy Subscription</Button>
+                                    </Link>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </>
                           ) : (
-                            <Link href="/shop" className="w-full">
-                              <RainbowButton className="w-full">
+                            <>
+                              <RainbowButton 
+                                className="w-full"
+                                onClick={() => setRedeemDialog(true)}
+                              >
                                 {isExpired ? "Buy" : "Extend"} Subscription
                               </RainbowButton>
-                            </Link>
+
+                              <Dialog
+                                  open={getRedeemDialog}
+                                  onOpenChange={setRedeemDialog}
+                                >
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      Enter your key below.
+                                    </DialogTitle>
+                                    <div className="text-muted-foreground text-xs sm:text-sm">
+                                      <p>Example, you can paste just the code:<br/>
+                                        &nbsp;<code className="text-stone-200">0123456789ABCDEF</code><br/>
+                                        Or the full link:<br/>
+                                        &nbsp;<code className="text-stone-200">https://www.mspaint.cc/purchase/completed?serial=0123456789ABCDEF</code>
+                                      </p>
+                                      <br/>
+                                      A new page will be created to claim the key.
+                                    </div>
+
+                                  </DialogHeader>
+                                  <div className="flex flex-row gap-2">
+                                    <Input placeholder="Enter key here..." value={key ?? ""} onChange={(event) => setKey(event.target.value)} className="text-[16px]" />
+                                    <Button onClick={handleRedeem}>Redeem Key</Button>
+                                  </div>
+                                  <div className="flex flex-row gap-2">
+                                    <p className="mt-2 text-sm text-gray-400">
+                                      Don&apos;t have a key? You can buy it here
+                                    </p>
+                                    <Link href="https://www.mspaint.cc/shop">
+                                      <Button variant="secondary">{isExpired ? "Buy" : "Extend"} Subscription</Button>
+                                    </Link>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </>
                           )}
                           <Button
                             variant="destructive"
                             className="w-full bg-red-600 hover:bg-red-700 cursor-pointer"
-                            onClick={signout}
+                            onClick={() => setSignOutDialog(true)}
                           >
                             Sign Out
                           </Button>
                         </>
                       )}
                     </div>
+
+                    <AlertDialog
+                        open={getSignOutDialog}
+                        onOpenChange={setSignOutDialog}
+                      >
+                      <AlertDialogContent className="max-w-xl">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you sure you want to Sign out?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You can sign in at anytime by going through{" "}<Link 
+                              className="text-blue-400 underline break-all" 
+                              href="/sign-in"
+                              target="_blank"
+                            >
+                              this link
+                            </Link>.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                          <Button
+                            variant="destructive"
+                            className=" bg-red-600 hover:bg-red-700 cursor-pointer"
+                            onClick={signout}
+                          >
+                            Sign Out
+                          </Button>                          
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
 
                     <CardFooter className="w-full flex items-center justify-center text-muted-foreground text-xs font-medium mt-2 -mb-14">
                       User updated {lastSyncTimeText}
