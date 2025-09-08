@@ -299,6 +299,13 @@ export default async function Home() {
             />
 
             <GameCard
+              title={"99 Nights In The Forest"}
+              id={79546208627805}
+              image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsADE6fvhZdFkZ8BrWt7UD6Chu0vipAY5EmbNLK`}
+              gamesStatusData={gamesStatusData}
+            />
+
+            <GameCard
               title={"Fisch"}
               id={16732694052}
               image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsncwz3g7ulbhtMx156dQV3GozKUs08gOmX9jv`}
