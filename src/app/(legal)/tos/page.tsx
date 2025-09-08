@@ -228,7 +228,7 @@ export default async function TOS(props: {
           </p>
 
           <p className="text-center text-sm mt-4 text-gray-400">
-            Last Updated: April 7, 2025
+            Last Updated: September 8, 2025
           </p>
         </BlurFade>
       </div>
