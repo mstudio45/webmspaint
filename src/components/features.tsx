@@ -22,7 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { LatestBuild, MenuMapping } from "../../features.config";
+import { LatestBuild, MenuMapping } from "@/data/features";
 
 import { useResetUIState } from "./obsidian/uiState";
 

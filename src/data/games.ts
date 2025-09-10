@@ -13,4 +13,5 @@ export const gamesList = [
   "Bubble Gum Simulator Infinity",
   "Grow A Garden",
   "Forsaken",
+  "99 Nights In The Forest",
 ];
