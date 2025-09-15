@@ -50,9 +50,11 @@ export default function Toggle({
       </button>
 
       <span
-        className={`ml-[28px] text-left block text-sm select-none opacity-${
-          isChecked == true ? "80" : "60"
-        } transition-opacity ${risky ? "text-red-500" : "text-white"}`}
+        className={`ml-[28px] text-left block text-sm select-none transition-opacity`}
+        style={{
+          opacity: isChecked == true ? 0.8 : 0.6,
+          color: risky ? "var(--color-red-500)" : "var(--color-white)",
+        }}
       >
         {text}
       </span>
