@@ -1,10 +1,11 @@
-name: Update registry on Obsidian changes
+name: Update shadcn registry (Obsidian component)
 
 on:
   push:
     paths:
       - "src/components/obsidian/**"
       - "scripts/build_registry.mjs"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
