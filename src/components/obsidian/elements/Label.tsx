@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import DOMPurify from "dompurify";
+import createDOMPurify from "dompurify";
 import type { ReactNode, CSSProperties } from "react";
 
 function escapeHtml(input: string) {
@@ -137,10 +137,11 @@ export default function Label({
 
   if (typeof children === "string") {
     const htmlUnsafe = robloxRichTextToHtml(children);
-    const html = DOMPurify.sanitize(htmlUnsafe, {
+    const DOMPurify = typeof window !== "undefined" ? createDOMPurify(window) : undefined;
+    const html = DOMPurify?.sanitize(htmlUnsafe, {
       ALLOWED_TAGS: ["b", "i", "u", "s", "br", "span"],
       ALLOWED_ATTR: ["style"],
-    });
+    }) ?? htmlUnsafe;
     return (
       <span
         className={finalClassName}
