@@ -10,6 +10,7 @@ import type {
   UIElement,
   Color3,
   Vector2,
+  TabboxData,
 } from "./element.types";
 import { UIStateProvider } from "./UIStateProvider";
 import { ObsidianWindow } from "./Window";
@@ -137,17 +138,29 @@ const TAGS = {
   TabWarning: "obsidian-tabwarning",
 } as const;
 
-export const ObsidianTab: any = TAGS.Tab;
+// Strongly-typed, no-op marker components used for structural parsing
+const makeMarker = <P extends object>(display: string) => {
+  const Marker: React.FC<P> = () => null;
+  Marker.displayName = display;
+  return Marker;
+};
 
-export const ObsidianLeft: any = TAGS.Left;
+export const ObsidianTab = makeMarker<ObsidianTabProps>("ObsidianTab");
+export const ObsidianLeft = makeMarker<ObsidianSideProps>("ObsidianLeft");
+export const ObsidianRight = makeMarker<ObsidianSideProps>("ObsidianRight");
+export const ObsidianGroupbox = makeMarker<ObsidianGroupboxProps>(
+  "ObsidianGroupbox"
+);
 
-export const ObsidianRight: any = TAGS.Right;
-
-export const ObsidianGroupbox: any = TAGS.Groupbox;
-
-export const OToggle: any = TAGS.Toggle;
-
-export const OLabel: any = TAGS.Label;
+export const OToggle = makeMarker<OToggleProps>("OToggle");
+export const OLabel = makeMarker<OLabelProps>("OLabel");
+export const OButton = makeMarker<OButtonProps>("OButton");
+export const ODropdown = makeMarker<ODropdownProps>("ODropdown");
+export const OSlider = makeMarker<OSliderProps>("OSlider");
+export const OInput = makeMarker<OInputProps>("OInput");
+export const ODivider = makeMarker<ODividerProps>("ODivider");
+export const OImage = makeMarker<OImageProps>("OImage");
+export const TabWarning = makeMarker<TabWarningProps>("TabWarning");
 
 // Long-form aliases for convenience in pages
 export { OLabel as ObsidianLabel };
@@ -158,54 +171,47 @@ export { OSlider as ObsidianSlider };
 export { OInput as ObsidianInput };
 export { ODivider as ObsidianDivider };
 export { OImage as ObsidianImage };
-
-export const OButton: any = TAGS.Button;
-
-export const ODropdown: any = TAGS.Dropdown;
-
-export const OSlider: any = TAGS.Slider;
-
-export const OInput: any = TAGS.Input;
-
-export const ODivider: any = TAGS.Divider;
-
-export const OImage: any = TAGS.Image;
-
-export const TabWarning: any = TAGS.TabWarning;
-
 export { TabWarning as ObsidianTabWarning };
 
 // Parsing helpers
 const MARK = "__obsidianType";
-function isTag(node: ReactNode, tag: string): node is React.ReactElement<any> {
-  return !!(node && typeof node === "object" && (node as any).type === tag);
+type ElementLike = { type?: unknown };
+function isTag(node: ReactNode, tag: string): node is React.ReactElement {
+  return !!(node && typeof node === "object" && (node as ElementLike).type === tag);
 }
-function getExportNameFromClientRef(ref: any): string | undefined {
+function getExportNameFromClientRef(ref: unknown): string | undefined {
   // Next.js client references often have an $$id like "path/to/file.tsx#ExportName"
-  const id = ref && typeof ref.$$id === "string" ? ref.$$id : undefined;
+  const maybe = ref as { $$id?: unknown } | undefined;
+  const id = maybe && typeof maybe.$$id === "string" ? maybe.$$id : undefined;
   if (!id) return undefined;
   const hash = id.lastIndexOf("#");
   return hash >= 0 ? id.slice(hash + 1) : undefined;
 }
 
-function getTypeName(t: any): string | undefined {
+type NameLike = {
+  displayName?: string;
+  name?: string;
+  _name?: string;
+  render?: { displayName?: string; name?: string };
+};
+function getTypeName(t: unknown): string | undefined {
+  const n = t as NameLike | undefined;
   return (
-    t?.displayName ||
-    t?.name ||
-    t?._name ||
-    t?.render?.displayName ||
-    t?.render?.name ||
+    n?.displayName ||
+    n?.name ||
+    n?._name ||
+    n?.render?.displayName ||
+    n?.render?.name ||
     getExportNameFromClientRef(t)
   );
 }
 
 function isElementOfType<T>(
   node: ReactNode,
-  cmp: (props: T) => React.ReactElement | null
+  cmp: React.ComponentType<T>
 ): node is React.ReactElement<T> {
-  if (!node || typeof node !== "object" || !("type" in (node as any)))
-    return false;
-  const t = (node as any).type as any;
+  if (!React.isValidElement(node)) return false;
+  const t = node.type as unknown;
   if (t === cmp) return true;
 
   const tName = getTypeName(t);
@@ -221,13 +227,10 @@ function isElementOfType<T>(
 function isMarker(
   node: ReactNode,
   type: string
-): node is React.ReactElement<any> {
-  return !!(
-    node &&
-    typeof node === "object" &&
-    (node as any)?.props &&
-    (node as any).props[MARK] === type
-  );
+): node is React.ReactElement {
+  if (!node || typeof node !== "object") return false;
+  const el = node as { props?: Record<string, unknown> };
+  return !!(el.props && el.props[MARK] === type);
 }
 
 function parseElements(
@@ -510,21 +513,48 @@ function buildUIData(children?: ReactNode): UIData | undefined {
 // Accepts a variety of shapes and normalizes into UIData
 function normalizeUIData(data: unknown): UIData | undefined {
   if (!data || typeof data !== "object") return undefined;
-  const anyData = data as any;
+  const anyData = data as { tabs?: unknown };
   const tabsSrc =
-    anyData.tabs && typeof anyData.tabs === "object" ? anyData.tabs : undefined;
+    anyData.tabs && typeof anyData.tabs === "object"
+      ? (anyData.tabs as Record<string, unknown>)
+      : undefined;
   if (!tabsSrc) return undefined;
 
   const outTabs: Record<string, TabData> = {};
-  for (const [name, raw] of Object.entries<any>(tabsSrc)) {
+  for (const [name, raw] of Object.entries(tabsSrc as Record<string, unknown>)) {
     if (!raw || typeof raw !== "object") continue;
 
-    const normalizeGroupSide = (side: any): { [key: string]: GroupboxData } => {
+    type RawTab = {
+      name?: string;
+      type?: string;
+      icon?: string;
+      order?: unknown;
+      tabboxes?: {
+        Left?: unknown;
+        Right?: unknown;
+        Unknown?: unknown;
+      };
+      groupboxes?: {
+        Left?: unknown;
+        Right?: unknown;
+        Unknown?: unknown;
+      };
+      warningBox?: {
+        Visible?: unknown;
+        Title?: unknown;
+        IsNormal?: unknown;
+        Text?: unknown;
+        LockSize?: unknown;
+      };
+    };
+
+    const normalizeGroupSide = (side: unknown): { [key: string]: GroupboxData } => {
       if (!side) return {};
       if (Array.isArray(side)) {
         const acc: { [key: string]: GroupboxData } = {};
-        for (const gb of side) {
-          if (gb && gb.name) acc[String(gb.name)] = gb as GroupboxData;
+        for (const gb of side as unknown[]) {
+          const maybeGb = gb as Partial<GroupboxData> | undefined;
+          if (maybeGb && maybeGb.name) acc[String(maybeGb.name)] = maybeGb as GroupboxData;
         }
         return acc;
       }
@@ -533,21 +563,23 @@ function normalizeUIData(data: unknown): UIData | undefined {
       return {};
     };
 
-    const normalizeTabSide = (side: any): any[] => {
+    const normalizeTabSide = (side: unknown): TabboxData[] => {
       if (!side) return [];
-      if (Array.isArray(side)) return side as any[];
-      if (typeof side === "object") return Object.values(side as Record<string, any>);
+      if (Array.isArray(side)) return side as TabboxData[];
+      if (typeof side === "object")
+        return Object.values(side as Record<string, TabboxData>);
       return [];
     };
 
-    const tabboxes = raw.tabboxes ?? { Left: [], Right: [], Unknown: [] };
-    const groupboxes = raw.groupboxes ?? { Left: {}, Right: {}, Unknown: {} };
+    const rawTab = raw as RawTab;
+    const tabboxes = rawTab.tabboxes ?? { Left: [], Right: [], Unknown: [] };
+    const groupboxes = rawTab.groupboxes ?? { Left: {}, Right: {}, Unknown: {} };
 
     outTabs[name] = {
-      name: raw.name ?? name,
-      type: raw.type ?? "Tab",
-      icon: raw.icon ?? "",
-      order: Number(raw.order ?? 0),
+      name: (rawTab.name ?? name) as string,
+      type: (rawTab.type ?? "Tab") as string,
+      icon: (rawTab.icon ?? "") as string,
+      order: Number(rawTab.order ?? 0),
       tabboxes: {
         Left: normalizeTabSide(tabboxes.Left),
         Right: normalizeTabSide(tabboxes.Right),
@@ -559,11 +591,11 @@ function normalizeUIData(data: unknown): UIData | undefined {
         Unknown: normalizeGroupSide(groupboxes.Unknown),
       },
       warningBox: {
-        Visible: Boolean(raw.warningBox?.Visible ?? false),
-        Title: String(raw.warningBox?.Title ?? ""),
-        IsNormal: Boolean(raw.warningBox?.IsNormal ?? true),
-        Text: String(raw.warningBox?.Text ?? ""),
-        LockSize: Boolean(raw.warningBox?.LockSize ?? false),
+        Visible: Boolean(rawTab.warningBox?.Visible ?? false),
+        Title: String(rawTab.warningBox?.Title ?? ""),
+        IsNormal: Boolean(rawTab.warningBox?.IsNormal ?? true),
+        Text: String(rawTab.warningBox?.Text ?? ""),
+        LockSize: Boolean(rawTab.warningBox?.LockSize ?? false),
       },
     } as TabData;
   }
