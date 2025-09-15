@@ -55,7 +55,7 @@
     },
     {
       "path": "src/components/obsidian/elements/Divider.tsx",
-      "content": "export default function Divider() {\n    return <hr className=\"w-full h-[4px] border-[rgb(40,40,40)] border\" />\n}",
+      "content": "export default function Divider() {\n  return (\n    <hr className=\"w-full h-[4px] border-[rgb(40,40,40)] border mt-0 mb-0\" />\n  );\n}\n",
       "type": "registry:ui",
       "target": "components/obsidian/elements/Divider.tsx"
     },
