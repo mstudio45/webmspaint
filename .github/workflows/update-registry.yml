@@ -5,7 +5,7 @@ on:
     paths:
       - "src/components/obsidian/**"
       - "registry/**"
-      - "scripts/build_registry.mjs"
+      - "scripts/build-registry.mjs"
   workflow_dispatch: {}
 
 permissions:
