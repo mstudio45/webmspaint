@@ -4,7 +4,7 @@
   "homepage": "https://www.mspaint.cc/",
   "items": [
     {
-      "name": "Obsidian",
+      "name": "obsidian",
       "type": "registry:ui",
       "title": "Obsidian",
       "description": "A fully interactive clone of the popular UI Library Obsidian for Next.js, React and TailwindCSS.",
@@ -119,6 +119,28 @@
           "path": "src/components/obsidian/elements/addons/KeyPicker.tsx",
           "type": "registry:ui",
           "target": "components/obsidian/elements/addons/KeyPicker.tsx"
+        }
+      ]
+    },
+    {
+      "name": "obsidian-demo",
+      "type": "registry:page",
+      "title": "Obsidian Demo",
+      "description": "A fully responsive demo of obsidian",
+      "registryDependencies": [
+        "https://www.mspaint.cc/r/obsidian"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/obsidian-demo/page.tsx",
+          "type": "registry:page",
+          "target": "app/obsidian-demo/page.tsx"
+        },
+        {
+          "path": "registry/obsidian-demo/ObsidianExtracted.json",
+          "type": "registry:file",
+          "target": "app/obsidian-demo/ObsidianExtracted.json"
         }
       ]
     }

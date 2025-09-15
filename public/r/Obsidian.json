@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "Obsidian",
+  "name": "obsidian",
   "type": "registry:ui",
   "title": "Obsidian",
   "description": "A fully interactive clone of the popular UI Library Obsidian for Next.js, React and TailwindCSS.",

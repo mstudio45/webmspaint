@@ -4,7 +4,7 @@ let BaseRegistryOption = {
   "homepage": "https://www.mspaint.cc/",
   "items": [
     {
-      "name": "Obsidian",
+      "name": "obsidian",
       "type": "registry:ui",
       "title": "Obsidian",
       "description": "A fully interactive clone of the popular UI Library Obsidian for Next.js, React and TailwindCSS.",
@@ -13,6 +13,26 @@ let BaseRegistryOption = {
         "dompurify"
       ],
       "files": []
+    },
+    {
+      "name": "obsidian-demo",
+      "type": "registry:page",
+      "title": "Obsidian Demo",
+      "description": "A fully responsive demo of obsidian",
+      "registryDependencies": ["https://www.mspaint.cc/r/obsidian"],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/obsidian-demo/page.tsx",
+          "type": "registry:page",
+          "target": "app/obsidian-demo/page.tsx"
+        },
+        {
+          "path": "registry/obsidian-demo/ObsidianExtracted.json",
+          "type": "registry:file",
+          "target": "app/obsidian-demo/ObsidianExtracted.json"
+        }
+      ]
     }
   ]
 }
@@ -22,6 +42,7 @@ import path from "path";
 
 const registryPath = path.join(process.cwd(), "registry.json");
 
+// Obsidian Component
 const componentsPath = path.join(process.cwd(), "src", "components", "obsidian");
 const componentFiles = fs.readdirSync(componentsPath, {
     recursive: true
