@@ -10,8 +10,7 @@ let BaseRegistryOption = {
       "description": "A fully interactive clone of the popular UI Library Obsidian for Next.js, React and TailwindCSS.",
       "registryDependencies": ["tabs"],
       "dependencies": [
-        "isomorphic-dompurify",
-        "jsdom"
+        "dompurify"
       ],
       "files": []
     }

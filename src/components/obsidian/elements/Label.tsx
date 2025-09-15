@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import type { ReactNode, CSSProperties } from "react";
 
 function escapeHtml(input: string) {
