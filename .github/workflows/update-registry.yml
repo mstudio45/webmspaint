@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "src/components/obsidian/**"
+      - "registry/**"
       - "scripts/build_registry.mjs"
   workflow_dispatch: {}
 

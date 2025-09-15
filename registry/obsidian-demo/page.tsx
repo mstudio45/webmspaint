@@ -16,8 +16,10 @@ export default function DemoObsidian() {
   );
 
   return (
-    <div className="max-w-[720px] max-h-[600px] scale-[0.8] max-sm:scale-[0.5] md:scale-90 lg:scale-100">
-      {memoizedObsidian}
+    <div className="w-screen h-screen flex justify-center items-center">
+      <div className="max-w-[720px] max-h-[600px] scale-[0.8] max-sm:scale-[0.5] md:scale-90 lg:scale-100">
+        {memoizedObsidian}
+      </div>
     </div>
   );
 }
