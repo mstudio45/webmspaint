@@ -12,7 +12,7 @@
         "tabs"
       ],
       "dependencies": [
-        "isomorphic-dompurify"
+        "dompurify"
       ],
       "files": [
         {
