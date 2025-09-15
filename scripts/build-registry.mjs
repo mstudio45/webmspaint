@@ -13,14 +13,16 @@ let BaseRegistryOption = {
         "dompurify"
       ],
       "css": {
-        ".no-scrollbar": {
-          "-ms-overflow-style": "none",
-          "scrollbar-width": "none"
-        },
-        ".no-scrollbar::-webkit-scrollbar": {
-          "width": "0px",
-          "height": "0px",
-          "display": "none"
+        "@utility scrollbar-none": {
+          "scrollbar-none": {
+            "-ms-overflow-style": "none",
+            "scrollbar-width": "none",
+            "&::-webkit-scrollbar": {
+              "width": "0px",
+              "height": "0px",
+              "display": "none"
+            }
+          }
         }
       },
       "files": []
