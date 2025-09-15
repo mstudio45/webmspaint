@@ -11,7 +11,7 @@
   "files": [
     {
       "path": "registry/obsidian-demo/page.tsx",
-      "content": "import { useMemo } from \"react\";\nimport { Obsidian } from \"@/components/obsidian/obsidian\";\nimport UIData from \"./ObsidianExtracted.json\";\n\nexport default function DemoObsidian() {\n  const memoizedObsidian = useMemo(\n    () => (\n      <Obsidian\n        title=\"mspaint\"\n        icon=\"/mspaint.png\"\n        footer=\"version: example\"\n        uiData={UIData}\n      />\n    ),\n    []\n  );\n\n  return (\n    <div className=\"max-w-[720px] max-h-[600px] scale-[0.8] max-sm:scale-[0.5] md:scale-90 lg:scale-100\">\n      {memoizedObsidian}\n    </div>\n  );\n}\n",
+      "content": "import { useMemo } from \"react\";\nimport { Obsidian } from \"@/components/obsidian/obsidian\";\nimport UIData from \"./ObsidianExtracted.json\";\n\nexport default function DemoObsidian() {\n  const memoizedObsidian = useMemo(\n    () => (\n      <Obsidian\n        title=\"mspaint\"\n        icon=\"/mspaint.png\"\n        footer=\"version: example\"\n        uiData={UIData}\n      />\n    ),\n    []\n  );\n\n  return (\n    <div className=\"w-screen h-screen flex justify-center items-center\">\n      <div className=\"max-w-[720px] max-h-[600px] scale-[0.8] max-sm:scale-[0.5] md:scale-90 lg:scale-100\">\n        {memoizedObsidian}\n      </div>\n    </div>\n  );\n}\n",
       "type": "registry:page",
       "target": "app/obsidian-demo/page.tsx"
     },
