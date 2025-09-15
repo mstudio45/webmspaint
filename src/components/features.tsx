@@ -24,7 +24,7 @@ import {
 
 import { LatestBuild, MenuMapping } from "@/data/features";
 
-import { useResetUIState } from "./obsidian/uiState";
+import { useResetUIState } from "./obsidian/UIStateProvider";
 
 export function GameSelection({
   onValueChange,

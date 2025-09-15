@@ -6,7 +6,7 @@ import Label from "./Label";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { IBMMono } from "../fonts";
-import { useUIValue } from "../uiState";
+import { useUIValue } from "../UIStateProvider";
 
 function useClickOutside(
   ref: React.RefObject<HTMLElement>,
@@ -240,7 +240,8 @@ export default function Dropdown({
               "absolute left-0 right-0 z-50 max-h-[168px]",
               "rounded-[1px] bg-[rgb(15,15,15)] border-[rgb(40,40,40)] border",
               "overflow-scroll",
-              "no-scrollbar"
+              "no-scrollbar",
+              "text-white"
             )}
             onScroll={onScroll}
           >

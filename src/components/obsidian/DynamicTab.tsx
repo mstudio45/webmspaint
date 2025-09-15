@@ -18,7 +18,11 @@ import ColorPicker from "./elements/addons/ColorPicker";
 import ObsidianWarningBox from "./elements/WarningBox";
 
 // Parsers //
-const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: string) => {
+const renderAddons = (
+  element: UIElement,
+  addons?: Addons[],
+  stateKeyPrefix?: string
+) => {
   if (!addons || addons.length === 0) return null;
 
   const scope = stateKeyPrefix || "global";
@@ -26,7 +30,7 @@ const renderAddons = (element: UIElement, addons?: Addons[], stateKeyPrefix?: st
     <AddonContainer className="absolute inset-0 pointer-events-none">
       {addons.map((addon, idx) => {
         const addonKey = `${scope}:addon:${addon.type}:${element.index}:${idx}`;
-        
+
         switch (addon.type) {
           case "KeyPicker":
             return (
@@ -64,7 +68,8 @@ export const ElementParser: FC<{
   if ("visible" in element && !element.visible) return null;
 
   const scope = stateKeyPrefix || "global";
-  const addons = (element as unknown as { properties?: { addons?: Addons[] } }).properties?.addons;
+  const addons = (element as unknown as { properties?: { addons?: Addons[] } })
+    .properties?.addons;
   const core = (() => {
     switch (element.type) {
       case "Toggle":
@@ -154,30 +159,38 @@ export const ElementParser: FC<{
   );
 };
 
-const TabParserComponent: FC<{ tabData: TabData | null }> = ({
-  tabData,
-}) => {
+const TabParserComponent: FC<{ tabData: TabData | null }> = ({ tabData }) => {
   const { groupboxes, tabboxes, warningBox } = tabData || {};
 
-  const leftGroupboxes = useMemo(() =>
-    groupboxes?.Left ?
-      Object.values(groupboxes.Left).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
-      []
-    , [groupboxes?.Left]);
+  const leftGroupboxes = useMemo(
+    () =>
+      groupboxes?.Left
+        ? Object.values(groupboxes.Left).sort(
+            (a, b) => (a.order ?? 0) - (b.order ?? 0)
+          )
+        : [],
+    [groupboxes?.Left]
+  );
 
-  const rightGroupboxes = useMemo(() =>
-    groupboxes?.Right ?
-      Object.values(groupboxes.Right).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) :
-      []
-    , [groupboxes?.Right]);
+  const rightGroupboxes = useMemo(
+    () =>
+      groupboxes?.Right
+        ? Object.values(groupboxes.Right).sort(
+            (a, b) => (a.order ?? 0) - (b.order ?? 0)
+          )
+        : [],
+    [groupboxes?.Right]
+  );
 
-  const leftTabboxes = useMemo(() =>
-    tabboxes?.Left ? Object.values(tabboxes.Left) : []
-    , [tabboxes?.Left]);
+  const leftTabboxes = useMemo(
+    () => (tabboxes?.Left ? Object.values(tabboxes.Left) : []),
+    [tabboxes?.Left]
+  );
 
-  const rightTabboxes = useMemo(() =>
-    tabboxes?.Right ? Object.values(tabboxes.Right) : []
-    , [tabboxes?.Right]);
+  const rightTabboxes = useMemo(
+    () => (tabboxes?.Right ? Object.values(tabboxes.Right) : []),
+    [tabboxes?.Right]
+  );
 
   if (!tabData) return null;
 

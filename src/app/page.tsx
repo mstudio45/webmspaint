@@ -33,7 +33,7 @@ import {
   ScrollVelocityContainer,
   ScrollVelocityRow,
 } from "@/components/magicui/scroll-based-velocity";
-import { UIStateProvider } from "@/components/obsidian/uiState";
+import { UIStateProvider } from "@/components/obsidian/UIStateProvider";
 
 export default async function Home() {
   const session = await auth();
