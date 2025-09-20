@@ -8,6 +8,7 @@ import { gamesList } from "@/data/games";
 import type { ReactNode } from "react";
 import FortniteMarquee from "@/components/fortnite-marquee";
 import EpilepsyGate from "@/components/epilepsy-gate";
+import ChaosEngine from "@/components/chaos-engine";
 
 const description =
   "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace, murder mystery 2 — and yes, Fortnite / Fortntie";
@@ -65,6 +66,7 @@ export default function RootLayout({
           {children}
           <FortniteMarquee />
           <EpilepsyGate />
+          <ChaosEngine />
           <Toaster richColors />
           <Analytics />
         </ThemeProvider>

@@ -232,6 +232,30 @@ html.deep-fry *::after {
   -moz-osx-font-smoothing: auto;
 }
 
+/* Chaos effects */
+.chaos-shake {
+  animation: chaos-shake 90ms steps(2, end) 3;
+}
+
+@keyframes chaos-shake {
+  0% { transform: translate(0, 0) rotate(0.2deg); }
+  50% { transform: translate(2px, -2px) rotate(-0.2deg); }
+  100% { transform: translate(-1px, 1px) rotate(0.1deg); }
+}
+
+.chaos-glitch {
+  position: relative;
+  animation: chaos-glitch 250ms steps(2, end) 2;
+}
+
+@keyframes chaos-glitch {
+  0% { filter: hue-rotate(0deg) contrast(200%); }
+  50% { filter: hue-rotate(180deg) contrast(300%); transform: translateX(1px); }
+  100% { filter: hue-rotate(360deg) contrast(200%); transform: translateX(-1px); }
+}
+
+html.chaos-strobe body { filter: brightness(200%) contrast(300%) saturate(700%) hue-rotate(180deg) !important; }
+
 /* Scanlines + noise overlay */
 html.deep-fry body::before,
 html.deep-fry body::after {
