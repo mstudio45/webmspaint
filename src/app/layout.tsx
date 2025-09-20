@@ -6,9 +6,10 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { gamesList } from "@/data/games";
 import type { ReactNode } from "react";
+import FortniteMarquee from "@/components/fortnite-marquee";
 
 const description =
-  "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace and murder mystery 2";
+  "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace, murder mystery 2 — and yes, Fortnite / Fortntie";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -29,6 +30,8 @@ export const metadata: Metadata = {
     "working script",
     "2024",
     "2025",
+    "Fortnite",
+    "FORTNITE",
     ...gamesList,
   ],
 };
@@ -46,7 +49,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning suppressContentEditableWarning>
+    <html lang="en" suppressHydrationWarning suppressContentEditableWarning className="deep-fry">
       {/* <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head> */}
@@ -59,6 +62,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <FortniteMarquee />
           <Toaster richColors />
           <Analytics />
         </ThemeProvider>
