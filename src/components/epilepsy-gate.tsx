@@ -92,6 +92,9 @@ export default function EpilepsyGate() {
           <button
             type="button"
             onClick={() => {
+              try {
+                document.documentElement.classList.add("deep-fry");
+              } catch {}
               setShow(false);
             }}
             style={{

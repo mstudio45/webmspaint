@@ -50,7 +50,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning suppressContentEditableWarning className="deep-fry">
+    <html lang="en" suppressHydrationWarning suppressContentEditableWarning>
       {/* <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head> */}
