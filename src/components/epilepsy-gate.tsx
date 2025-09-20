@@ -2,26 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-export default function EpilepsyGate() {
+export default function EpilepsyGate({ onProceed }: { onProceed?: () => void }) {
   const [show, setShow] = useState(true);
-
-  // Optional bypass: if URL has ?chaos=1 or ?deepfry=1, skip gate and enable fry
-  useEffect(() => {
-    try {
-      const url = new URL(window.location.href);
-      const bypass = ["1", "true", "on", "yes"].includes(
-        (url.searchParams.get("chaos") || url.searchParams.get("deepfry") || "").toLowerCase()
-      );
-      if (bypass) {
-        document.documentElement.classList.add("deep-fry");
-        document.documentElement.classList.remove("gate-pending");
-        setShow(false);
-      }
-    } catch {}
-  }, []);
-
-  // No SSR gating class anymore; overlay simply covers the page.
-
+  // Overlay covers the page and locks scroll while visible
+  
   useEffect(() => {
     if (show) {
       const prev = document.body.style.overflow;
@@ -107,10 +91,8 @@ export default function EpilepsyGate() {
           <button
             type="button"
             onClick={() => {
-              try {
-                document.documentElement.classList.add("deep-fry");
-                document.documentElement.classList.remove("gate-pending");
-              } catch {}
+              try { document.documentElement.classList.remove("gate-pending"); } catch {}
+              try { onProceed?.(); } catch {}
               setShow(false);
             }}
             style={{
