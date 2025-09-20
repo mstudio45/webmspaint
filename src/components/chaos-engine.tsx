@@ -2,6 +2,12 @@
 
 import { useEffect, useRef } from "react";
 
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 function rand(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
@@ -9,12 +15,13 @@ function rand(min: number, max: number) {
 export default function ChaosEngine() {
   const layerRef = useRef<HTMLDivElement | null>(null);
   const crtRef = useRef<HTMLDivElement | null>(null);
-  const timers = useRef<number[]>([]);
+  // track timers locally inside effect to satisfy lint and ensure cleanup
   const audioStarted = useRef(false);
   const audioCtx = useRef<AudioContext | null>(null);
   const gainNode = useRef<GainNode | null>(null);
 
   useEffect(() => {
+    const localTimers: number[] = [];
     const layer = document.createElement("div");
     layer.style.position = "fixed";
     layer.style.inset = "0";
@@ -46,7 +53,8 @@ export default function ChaosEngine() {
       if (audioStarted.current) return;
       audioStarted.current = true;
       try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AC();
         const gain = ctx.createGain();
         gain.gain.value = 0.03;
         gain.connect(ctx.destination);
@@ -72,7 +80,7 @@ export default function ChaosEngine() {
           osc.stop(now + 0.25);
         };
         const id = window.setInterval(beep, 2200);
-        timers.current.push(id);
+        localTimers.push(id);
       } catch {}
     };
 
@@ -127,7 +135,7 @@ export default function ChaosEngine() {
       // Spawn falling stickers
       for (let i = 0; i < 6; i++) spawnFalling();
     }, 1800);
-    timers.current.push(pulse);
+    localTimers.push(pulse);
 
     // Persistent tilt vibe
     document.body.classList.add("chaos-tilt");
@@ -135,7 +143,7 @@ export default function ChaosEngine() {
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("click", onClick);
-      timers.current.forEach((t) => window.clearInterval(t));
+      localTimers.forEach((t) => window.clearInterval(t));
       if (layerRef.current) document.body.removeChild(layerRef.current);
       if (crtRef.current) document.body.removeChild(crtRef.current);
       try { audioCtx.current?.close(); } catch {}
