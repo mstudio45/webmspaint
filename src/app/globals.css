@@ -256,6 +256,37 @@ html.deep-fry *::after {
 
 html.chaos-strobe body { filter: brightness(200%) contrast(300%) saturate(700%) hue-rotate(180deg) !important; }
 
+/* Persistent tilt for overall unease */
+body.chaos-tilt {
+  animation: chaos-tilt 2.4s ease-in-out infinite alternate;
+}
+@keyframes chaos-tilt {
+  from { transform: rotate(-0.8deg) skewX(-0.4deg); }
+  to   { transform: rotate(0.9deg)  skewX(0.6deg); }
+}
+
+/* Occasional full invert */
+html.chaos-invert body {
+  filter: invert(1) hue-rotate(180deg) saturate(300%) !important;
+}
+
+/* Rainbow text effect for random elements */
+.chaos-rainbow-text {
+  background: linear-gradient(90deg, #ff0044, #ffee00, #00ff99, #00ccff, #9933ff, #ff0044);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: bg-sheen 1.2s linear infinite;
+}
+
+/* Falling FORTNITE stickers */
+@keyframes chaos-fall {
+  0% { transform: translateY(-10vh) rotate(-10deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(15deg); opacity: 0; }
+}
+
 /* Scanlines + noise overlay */
 html.deep-fry body::before,
 html.deep-fry body::after {
@@ -383,4 +414,10 @@ html.deep-fry button, html.deep-fry .btn, html.deep-fry [role="button"] {
 @keyframes bg-sheen {
   0% { background-position: 0% 0%; }
   100% { background-position: 300% 0%; }
+}
+
+/* CRT warp shimmer */
+@keyframes crt-warp {
+  0% { transform: scale(1.002) skewX(0.1deg) skewY(0.1deg); }
+  100% { transform: scale(1.01) skewX(-0.15deg) skewY(-0.1deg); }
 }

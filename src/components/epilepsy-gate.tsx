@@ -5,6 +5,20 @@ import { useEffect, useState } from "react";
 export default function EpilepsyGate() {
   const [show, setShow] = useState(true);
 
+  // Optional bypass: if URL has ?chaos=1 or ?deepfry=1, skip gate and enable fry
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const bypass = ["1", "true", "on", "yes"].includes(
+        (url.searchParams.get("chaos") || url.searchParams.get("deepfry") || "").toLowerCase()
+      );
+      if (bypass) {
+        document.documentElement.classList.add("deep-fry");
+        setShow(false);
+      }
+    } catch {}
+  }, []);
+
   // No SSR gating class anymore; overlay simply covers the page.
 
   useEffect(() => {
