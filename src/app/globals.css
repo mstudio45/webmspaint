@@ -192,6 +192,9 @@
 
 /* Hide content until the epilepsy gate runs on first load */
 /* (Removed gate-pending visibility mask — overlay covers content instead) */
+/* Gate: hide all content until the epilepsy overlay mounts; keep the overlay visible */
+html.gate-pending body * { visibility: hidden !important; }
+html.gate-pending .no-fry, html.gate-pending .no-fry * { visibility: visible !important; }
 
 .no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */

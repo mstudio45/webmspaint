@@ -14,6 +14,7 @@ export default function EpilepsyGate() {
       );
       if (bypass) {
         document.documentElement.classList.add("deep-fry");
+        document.documentElement.classList.remove("gate-pending");
         setShow(false);
       }
     } catch {}
@@ -108,6 +109,7 @@ export default function EpilepsyGate() {
             onClick={() => {
               try {
                 document.documentElement.classList.add("deep-fry");
+                document.documentElement.classList.remove("gate-pending");
               } catch {}
               setShow(false);
             }}
