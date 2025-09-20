@@ -5,11 +5,7 @@ import { useEffect, useState } from "react";
 export default function EpilepsyGate() {
   const [show, setShow] = useState(true);
 
-  useEffect(() => {
-    try {
-      document.documentElement.classList.remove("gate-pending");
-    } catch {}
-  }, []);
+  // No SSR gating class anymore; overlay simply covers the page.
 
   useEffect(() => {
     if (show) {
