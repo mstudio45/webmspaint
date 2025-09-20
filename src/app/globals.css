@@ -190,6 +190,10 @@
   }
 }
 
+/* Hide content until the epilepsy gate runs on first load */
+html.gate-pending body > * { visibility: hidden; }
+html.gate-pending body > .no-fry { visibility: visible; }
+
 .no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none;    /* Firefox */
@@ -198,6 +202,14 @@
   width: 0px;
   height: 0px;
   display: none;            /* Chrome, Safari, Opera */
+}
+
+/* Disable deep-fry effects within a subtree (used by the epilepsy gate) */
+html.deep-fry .no-fry, html.deep-fry .no-fry * {
+  filter: none !important;
+  animation: none !important;
+  text-shadow: none !important;
+  mix-blend-mode: normal !important;
 }
 
 /* Deep Fry Mode — aggressively painful visuals */
