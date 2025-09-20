@@ -22,14 +22,13 @@ export default function FortniteMarquee() {
     whiteSpace: "nowrap",
   };
 
-  const rowStyle: React.CSSProperties = {
+  const rowStyle: React.CSSProperties & { [key: string]: string | number } = {
     display: "inline-block",
     paddingInline: 24,
     animation: "marquee 12s linear infinite",
     willChange: "transform",
-    // @ts-ignore - custom property used by our keyframes
     "--gap": "2rem",
-  } as React.CSSProperties;
+  };
 
   return (
     <>
@@ -49,4 +48,3 @@ export default function FortniteMarquee() {
     </>
   );
 }
-
