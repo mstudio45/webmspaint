@@ -18,7 +18,8 @@ export default function ChaosEngine() {
   // track timers locally inside effect to satisfy lint and ensure cleanup
   const audioStarted = useRef(false);
   const audioCtx = useRef<AudioContext | null>(null);
-  const gainNode = useRef<GainNode | null>(null);
+  const gainNode = useRef<GainNode | null>(null); // entry to the FX chain (bus)
+  const masterGain = useRef<GainNode | null>(null); // final master gain for mute/tweak
 
   useEffect(() => {
     const localTimers: number[] = [];
@@ -55,32 +56,116 @@ export default function ChaosEngine() {
       try {
         const AC = window.AudioContext || window.webkitAudioContext;
         const ctx = new AC();
-        const gain = ctx.createGain();
-        gain.gain.value = 0.03;
-        gain.connect(ctx.destination);
+        // Build a small FX chain to make things harsh
+        const bus = ctx.createGain(); // pre-master bus
+        const distortion = ctx.createWaveShaper();
+        const compressor = ctx.createDynamicsCompressor();
+        const master = ctx.createGain();
+
+        // Louder by default – this will be intense
+        master.gain.value = 0.3; // overall loudness
+
+        // Distortion curve
+        const makeDistortionCurve = (amount: number) => {
+          const n_samples = 44100;
+          const curve = new Float32Array(n_samples);
+          const deg = Math.PI / 180;
+          for (let i = 0; i < n_samples; ++i) {
+            const x = (i * 2) / n_samples - 1;
+            curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+          }
+          return curve;
+        };
+        distortion.curve = makeDistortionCurve(1200);
+        distortion.oversample = "4x";
+
+        // Slight compression to tame clipping while staying aggressive
+        compressor.threshold.value = -6;
+        compressor.knee.value = 2;
+        compressor.ratio.value = 16;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.08;
+
+        // Chain: sources -> bus -> distortion -> compressor -> master -> destination
+        bus.connect(distortion);
+        distortion.connect(compressor);
+        compressor.connect(master);
+        master.connect(ctx.destination);
+
         audioCtx.current = ctx;
-        gainNode.current = gain;
+        gainNode.current = bus;
+        masterGain.current = master;
 
         const beep = () => {
           if (!audioCtx.current || !gainNode.current) return;
           const osc = audioCtx.current.createOscillator();
           osc.type = Math.random() < 0.5 ? "square" : "sawtooth";
           const now = audioCtx.current.currentTime;
-          const startFreq = 200 + Math.random() * 1000;
-          const endFreq = 50 + Math.random() * 150;
+          const startFreq = 400 + Math.random() * 2200;
+          const endFreq = 60 + Math.random() * 240;
           osc.frequency.setValueAtTime(startFreq, now);
           osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.18);
           const g = audioCtx.current.createGain();
           g.gain.setValueAtTime(0, now);
-          g.gain.linearRampToValueAtTime(0.05, now + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+          g.gain.linearRampToValueAtTime(0.35, now + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
           osc.connect(g);
           g.connect(gainNode.current);
           osc.start();
           osc.stop(now + 0.25);
         };
-        const id = window.setInterval(beep, 2200);
+        const id = window.setInterval(beep, 1100);
         localTimers.push(id);
+
+        const noiseBlast = () => {
+          if (!audioCtx.current || !gainNode.current) return;
+          const now = audioCtx.current.currentTime;
+          const buffer = audioCtx.current.createBuffer(1, audioCtx.current.sampleRate * 0.3, audioCtx.current.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1; // white noise
+          const src = audioCtx.current.createBufferSource();
+          src.buffer = buffer;
+          const bp = audioCtx.current.createBiquadFilter();
+          bp.type = "bandpass";
+          bp.frequency.value = 1200 + Math.random() * 2400;
+          bp.Q.value = 0.7;
+          const g = audioCtx.current.createGain();
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.7, now + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+          src.connect(bp);
+          bp.connect(g);
+          g.connect(gainNode.current);
+          src.start();
+          src.stop(now + 0.3);
+        };
+
+        const screech = () => {
+          if (!audioCtx.current || !gainNode.current) return;
+          const now = audioCtx.current.currentTime;
+          const osc = audioCtx.current.createOscillator();
+          osc.type = "sawtooth";
+          const g = audioCtx.current.createGain();
+          osc.frequency.setValueAtTime(3000, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.9, now + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.36);
+          osc.connect(g);
+          g.connect(gainNode.current);
+          osc.start();
+          osc.stop(now + 0.4);
+        };
+
+        // Random blasts layered with beeps
+        const nb = window.setInterval(() => {
+          if (Math.random() < 0.7) noiseBlast();
+        }, 1600);
+        localTimers.push(nb);
+
+        // Make clicks extra aggressive
+        window.addEventListener("click", screech);
+        localTimers.push(-1); // marker so we know to remove listener on cleanup
       } catch {}
     };
 
@@ -143,11 +228,31 @@ export default function ChaosEngine() {
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("click", onClick);
+      window.removeEventListener("click", startAudio);
+      window.removeEventListener("keydown", startAudio);
       localTimers.forEach((t) => window.clearInterval(t));
       if (layerRef.current) document.body.removeChild(layerRef.current);
       if (crtRef.current) document.body.removeChild(crtRef.current);
       try { audioCtx.current?.close(); } catch {}
     };
+  }, []);
+
+  // Mute/unmute with 'M'
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key || "").toLowerCase() === "m") {
+        const mg = masterGain.current;
+        if (!mg || !audioCtx.current) return;
+        const now = audioCtx.current.currentTime;
+        const current = mg.gain.value;
+        const target = current > 0.001 ? 0.0001 : 0.3;
+        mg.gain.cancelScheduledValues(now);
+        mg.gain.setValueAtTime(current, now);
+        mg.gain.exponentialRampToValueAtTime(target, now + 0.05);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   function spawnSticker(x: number, y: number) {
