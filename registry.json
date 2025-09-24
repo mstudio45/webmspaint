@@ -1,0 +1,148 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "Obsidian",
+  "homepage": "https://www.mspaint.cc/",
+  "items": [
+    {
+      "name": "obsidian",
+      "type": "registry:ui",
+      "title": "Obsidian",
+      "description": "A fully interactive clone of the popular UI Library Obsidian for Next.js, React and TailwindCSS.",
+      "registryDependencies": [
+        "tabs"
+      ],
+      "dependencies": [
+        "dompurify"
+      ],
+      "files": [
+        {
+          "path": "src/components/obsidian/DynamicTab.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/DynamicTab.tsx"
+        },
+        {
+          "path": "src/components/obsidian/UIStateProvider.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/UIStateProvider.tsx"
+        },
+        {
+          "path": "src/components/obsidian/Window.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/Window.tsx"
+        },
+        {
+          "path": "src/components/obsidian/element.types.ts",
+          "type": "registry:ui",
+          "target": "components/obsidian/element.types.ts"
+        },
+        {
+          "path": "src/components/obsidian/fonts.ts",
+          "type": "registry:ui",
+          "target": "components/obsidian/fonts.ts"
+        },
+        {
+          "path": "src/components/obsidian/obsidian.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/obsidian.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Button.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Button.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Divider.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Divider.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Dropdown.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Dropdown.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/GroupBox.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/GroupBox.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Image.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Image.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Input.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Input.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Label.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Label.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Slider.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Slider.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Tab.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Tab.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/TabBox.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/TabBox.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/Toggle.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/Toggle.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/WarningBox.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/WarningBox.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/addons/AddonContainer.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/addons/AddonContainer.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/addons/ColorPicker.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/addons/ColorPicker.tsx"
+        },
+        {
+          "path": "src/components/obsidian/elements/addons/KeyPicker.tsx",
+          "type": "registry:ui",
+          "target": "components/obsidian/elements/addons/KeyPicker.tsx"
+        }
+      ]
+    },
+    {
+      "name": "obsidian-demo",
+      "type": "registry:page",
+      "title": "Obsidian Demo",
+      "description": "A fully responsive demo of obsidian",
+      "registryDependencies": [
+        "https://www.mspaint.cc/r/obsidian"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/obsidian-demo/page.tsx",
+          "type": "registry:page",
+          "target": "app/obsidian-demo/page.tsx"
+        },
+        {
+          "path": "registry/obsidian-demo/ObsidianExtracted.json",
+          "type": "registry:file",
+          "target": "app/obsidian-demo/ObsidianExtracted.json"
+        }
+      ]
+    }
+  ]
+}

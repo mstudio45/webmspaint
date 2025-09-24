@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Label from "../Label";
 import { useEffect, useState, useMemo } from "react";
-import { useUIState } from "../../uiState";
+import { useUIState } from "../../UIStateProvider";
 
 export default function KeyPicker({
   defaultValue,
@@ -15,9 +15,9 @@ export default function KeyPicker({
   stateKey?: string;
 }) {
   const { state, setState } = useUIState();
-  
-  const storedValue = useMemo(() => 
-    (stateKey ? (state[stateKey] as string | undefined) : undefined),
+
+  const storedValue = useMemo(
+    () => (stateKey ? (state[stateKey] as string | undefined) : undefined),
     [stateKey, state]
   );
   const [value, setValue] = useState<string>(storedValue ?? defaultValue);
@@ -29,7 +29,7 @@ export default function KeyPicker({
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       const key = e.key;
       const cleaned = key.length === 1 ? key.toUpperCase() : key;
 
