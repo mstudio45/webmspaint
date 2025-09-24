@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:query": "node scripts/db-query.mjs",
-    "build:registry": "node scripts/build-registry.mjs && shadcn build"
+    "build:registry": "node scripts/build-registry.mjs && shadcn build",
+    "build:wc": "node scripts/build-obsidian-widget.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -72,6 +73,7 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "esbuild": "^0.25.10",
     "eslint": "^9.32.0",
     "eslint-config-next": "15.3.1",
     "tailwindcss": "^4.1.11",
