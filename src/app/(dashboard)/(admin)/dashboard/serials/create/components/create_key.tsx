@@ -316,27 +316,36 @@ export default function CreateSerialKey() {
                     | "none"
                     | "bloxproducts"
                     | "robloxcheatz"
+                    | "lick"
+                    | "outlaw"
                     | "giveaway"
                     | "replacement"
                 ) => {
                   if (selected === "none") {
                     setOrderID(null);
-                    return;
                   }
 
-                  if (selected === "giveaway") {
+                  else if (selected === "giveaway") {
                     setOrderID(`Giveaway`);
                   }
 
-                  if (selected === "bloxproducts") {
+                  else if (selected === "bloxproducts") {
                     setOrderID(`Bloxproducts - {UUID}`);
                   }
 
-                  if (selected === "robloxcheatz") {
+                  else if (selected === "robloxcheatz") {
                     setOrderID(`RobloxCheatz - {UUID}`);
                   }
 
-                  if (selected === "replacement") {
+                  else if (selected === "lick") {
+                    setOrderID(`Lick - {UUID}`);
+                  }
+
+                  else if (selected === "outlaw") {
+                    setOrderID(`Outlaw - {UUID}`);
+                  }
+
+                  else if (selected === "replacement") {
                     setOrderID(`REPLACEMENT`);
                   }
                 }}
@@ -352,6 +361,8 @@ export default function CreateSerialKey() {
                     <SelectLabel>Reseller</SelectLabel>
                     <SelectItem value="bloxproducts">Bloxproducts</SelectItem>
                     <SelectItem value="robloxcheatz">Robloxcheatz</SelectItem>
+                    <SelectItem value="lick">Lick</SelectItem>
+                    <SelectItem value="outlaw">Outlaw</SelectItem>
                   </SelectGroup>
 
                   <SelectGroup>
