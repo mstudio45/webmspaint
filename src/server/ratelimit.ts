@@ -20,9 +20,15 @@ export class RateLimitService {
   };
 
   private constructor() {
-    this.createLimiter("hwidreset", {
+    this.createLimiter("hwidreset_request", {
       analytics: false,
-      prefix: "ratelimit:hwidreset",
+      prefix: "ratelimit:hwidreset_request",
+      limiter: Ratelimit.slidingWindow(1, "30m"),
+    }, 30 * 60 * 1000); // 30 minutes in ms
+
+    this.createLimiter("hwidreset_success", {
+      analytics: false,
+      prefix: "ratelimit:hwidreset_success",
       limiter: Ratelimit.slidingWindow(1, "6h"),
     }, 6 * 60 * 60 * 1000); // 6 hours in ms
     
@@ -37,7 +43,6 @@ export class RateLimitService {
       prefix: "ratelimit:redeemkey",
       limiter: Ratelimit.slidingWindow(10, "2m"),
     }, 2 * 60 * 1000); // 2 minutes in ms
-
   }
 
   public static getInstance(): RateLimitService {
