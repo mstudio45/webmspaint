@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
-
-interface GithubContent {
-  type: string;
-  path: string;
-}
 
 type Review = {
   name: string;
@@ -63,37 +63,53 @@ const ReviewCard = ({
   );
 };
 
-export default function ReviewMarquee() {
-  const [firstRow, setFirstRow] = useState<Review[]>([]);
-  const [secondRow, setSecondRow] = useState<Review[]>([]);
-  const [average, setAverage] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+type ReviewsResponse = {
+  reviews: Review[];
+  average: number;
+};
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Hit our cached server endpoint instead of GitHub directly
-        const response = await fetch("/api/reviews", { method: "GET" });
-        const payload = await response.json();
-        const reviews = (payload?.reviews || []) as Review[];
-        const avg = typeof payload?.average === "number" ? payload.average : 0;
+const reviewsQueryKey = ["reviews"] as const;
 
-        const mid = Math.floor(reviews.length / 2);
-        setFirstRow(reviews.slice(0, mid));
-        setSecondRow(reviews.slice(mid));
-        setAverage(avg);
-      } catch {
-        // swallow and show empty state
-        setFirstRow([]);
-        setSecondRow([]);
-        setAverage(0);
-      } finally {
-        setIsLoading(false);
-      }
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 1000 * 60 * 5,
+    },
+  },
+});
+
+async function fetchReviews(): Promise<ReviewsResponse> {
+  try {
+    const response = await fetch("/api/reviews", { method: "GET" });
+    if (!response.ok) {
+      throw new Error("Failed to fetch reviews");
     }
 
-    fetchData();
-  }, []);
+    const payload = (await response.json()) as Partial<ReviewsResponse>;
+    const reviews = Array.isArray(payload?.reviews)
+      ? (payload.reviews as Review[])
+      : [];
+    const average = typeof payload?.average === "number" ? payload.average : 0;
+
+    return { reviews, average };
+  } catch {
+    return { reviews: [], average: 0 };
+  }
+}
+
+function ReviewMarqueeContent() {
+  const { data } = useSuspenseQuery({
+    queryKey: reviewsQueryKey,
+    queryFn: fetchReviews,
+  });
+
+  const { reviews, average } = data;
+
+  const [firstRow, secondRow] = useMemo(() => {
+    const mid = Math.floor(reviews.length / 2);
+    return [reviews.slice(0, mid), reviews.slice(mid)];
+  }, [reviews]);
 
   const memoizedFirstMarquee = useMemo(
     () => (
@@ -117,14 +133,12 @@ export default function ReviewMarquee() {
     [secondRow]
   );
 
-  return isLoading ? (
-    <div className="flex w-screen flex-col items-center justify-center">
-      <p>Loading...</p>
-    </div>
-  ) : (
+  const averageScore = Number.isFinite(average) ? average : 0;
+
+  return (
     <>
       <p className="text-muted-foreground text-sm">
-        Average mspaint rating: {average.toFixed(2)} ⭐
+        Average mspaint rating: {averageScore.toFixed(2)} ⭐
       </p>
 
       <div className="relative py-10 flex w-screen flex-col items-center justify-center overflow-hidden bg-background md:shadow-xl text-left">
@@ -134,5 +148,13 @@ export default function ReviewMarquee() {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white dark:from-background"></div>
       </div>
     </>
+  );
+}
+
+export default function ReviewMarquee() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ReviewMarqueeContent />
+    </QueryClientProvider>
   );
 }

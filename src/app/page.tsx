@@ -2,7 +2,10 @@ import { BlurFade } from "@/components/magicui/blur-fade";
 import DotPattern from "@/components/magicui/dot-pattern";
 import NumberTicker from "@/components/magicui/number-ticker";
 import Safari from "@/components/magicui/safari";
-import ReviewMarquee from "@/components/reviews";
+
+import { lazy } from "react";
+const ReviewMarquee = lazy(() => import("@/components/reviews"));
+
 import { MacbookComponent } from "@/components/ui/macbook";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
