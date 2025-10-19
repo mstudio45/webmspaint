@@ -63,6 +63,11 @@ export const MenuMapping = {
       DataURL: GetUIDataURL("doors/rooms"),
     },
 
+    "The Outdoors": {
+      Game: "DOORS",
+      DataURL: GetUIDataURL("doors/outdoors"),
+    },
+
     /*
     TODO: uncomment when they are no longer under maintenance
     "Hotel-": {
