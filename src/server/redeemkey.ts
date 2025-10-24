@@ -43,7 +43,11 @@ export async function RedeemKey(serial: string, user_id: string) {
       reserved_until = ${reservedMaxTimeout}
       WHERE serial = ${serial}
         AND claimed_at IS NULL
-        AND (reserved_to IS NULL OR reserved_to = ${user_id})
+        AND (
+          reserved_to IS NULL
+          OR reserved_to = ${user_id}
+          OR reserved_until < EXTRACT(EPOCH FROM NOW())
+        )
         AND (reserved_until IS NULL OR reserved_until < EXTRACT(EPOCH FROM NOW()))
       RETURNING *
     )
@@ -150,7 +154,7 @@ export async function RedeemKey(serial: string, user_id: string) {
       auth_expire: addSubscriptionTime,
     });
 
-    timeToBeAdded = addSubscriptionTime
+    timeToBeAdded = addSubscriptionTime;
 
     if (!response.ok) {
       return {
@@ -169,7 +173,7 @@ export async function RedeemKey(serial: string, user_id: string) {
       auth_expire: createSubscriptionTime,
     });
 
-    timeToBeAdded = createSubscriptionTime
+    timeToBeAdded = createSubscriptionTime;
 
     if (!response.ok) {
       return {
@@ -194,19 +198,22 @@ export async function RedeemKey(serial: string, user_id: string) {
 
   //in case we wanna handle multiple users one day
   const user_data = {
-    users: 
-    [
+    users: [
       {
         auth_expire: timeToBeAdded.toString(),
         discord_id: user_id,
         status: lrmUserFound ? lrmUserData.users[0].status : "reset",
-        banned: lrmUserFound ? lrmUserData.users[0].banned : 0
-      }
-    ]
-  }
+        banned: lrmUserFound ? lrmUserData.users[0].banned : 0,
+      },
+    ],
+  };
 
   //This will not use luarmor to syncronize since we're passing the essential data directly
-  const sync_result = await SyncSingleLuarmorUserByLRMSerial(luarmorSerialKey, false, user_data);
+  const sync_result = await SyncSingleLuarmorUserByLRMSerial(
+    luarmorSerialKey,
+    false,
+    user_data
+  );
 
   const order_id = (serialKeyData.order_id as string).toLowerCase();
   for (const [key, data] of Object.entries(RESELLER_DATA)) {
@@ -301,8 +308,11 @@ export async function RedeemKey(serial: string, user_id: string) {
     break;
   }
 
-  const operation = lrmUserFound ? "updated" : "created"
-  const SyncText = sync_result.status == 200 ? `User ${operation}` : "Warning: Unable to syncronize with luarmor."
+  const operation = lrmUserFound ? "updated" : "created";
+  const SyncText =
+    sync_result.status == 200
+      ? `User ${operation}`
+      : "Warning: Unable to syncronize with luarmor.";
 
   return {
     status: 200,
