@@ -1,4 +1,4 @@
-import { allowedRepositories } from "@/data/github";
+import { repoWhitelist } from "@/data/github";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest, slug: { params: Promise<{ slug: string[] }> }) {
@@ -7,14 +7,20 @@ export async function GET(req: NextRequest, slug: { params: Promise<{ slug: stri
         return new Response(JSON.stringify({ success: false, error: "Invalid path" }), {
             status: 400
         });
+    
+    // verify stuff //
+    const repoOwner = segments[0];
+    const repoName = segments[1];
 
-    if (allowedRepositories.indexOf(segments[0]) === -1)
+    const whitelistedRepos = repoWhitelist[repoOwner] ?? [];
+    if (whitelistedRepos.indexOf(repoName) === -1)
         return new Response(JSON.stringify({ success: false, error: "Invalid path" }), {
             status: 400
         });
-
+    
+    // get from github //
     try {
-        const response = await fetch(`https://raw.githubusercontent.com/mspaint-cc/${segments.join("/")}`, {
+        const response = await fetch(`https://raw.githubusercontent.com/${segments.join("/")}`, {
             method: "GET",
             cache: "force-cache",
             next: {
