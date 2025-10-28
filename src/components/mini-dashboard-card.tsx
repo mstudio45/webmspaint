@@ -197,7 +197,7 @@ export default function MiniDashboardCard({
                 </p>
               </div>
 
-              <div className="mb-5">
+              <div className={isMember ? "" : "mb-5"}>
                 {isMember ? (
                   <>
                     <div className="w-full flex justify-center sm:justify-start mt-2">
@@ -625,17 +625,17 @@ export default function MiniDashboardCard({
                       <RainbowButton className="w-full font-bold mt-2">
                         Buy mspaint
                       </RainbowButton>
-
-                      <Button
-                        variant="destructive"
-                        className={cn(
-                          "w-full max-w-xs bg-red-600 hover:bg-red-700 cursor-pointer"
-                        )}
-                        onClick={() => setSignOutDialog(true)}
-                      >
-                        Sign Out
-                      </Button>
                     </Link>
+
+                    <Button
+                      variant="destructive"
+                      className={cn(
+                        "w-full max-w-xs mt-2 bg-red-600 hover:bg-red-700 cursor-pointer"
+                      )}
+                      onClick={() => setSignOutDialog(true)}
+                    >
+                      Sign Out
+                    </Button>
                   </>
                 )}
               </div>
