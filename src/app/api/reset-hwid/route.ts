@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
     // reset hwid //
     const result = await ResetHardwareIDWithLuarmor(lrm_serial, isAdmin);
     if (result.status !== 200) {
+      try { await rateLimitService.deleteRequest("hwidreset_success", discordId); } catch { }
+
       return NextResponse.json(
         { error: result.error },
         { status: result.status }
@@ -115,7 +117,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: result.success });
   } catch (error) {
-    // clear the hwid thing //
     try { await rateLimitService.deleteRequest("hwidreset_success", discordId); } catch { }
 
     console.error(error);
