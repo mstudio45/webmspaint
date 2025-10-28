@@ -625,6 +625,16 @@ export default function MiniDashboardCard({
                       <RainbowButton className="w-full font-bold mt-2">
                         Buy mspaint
                       </RainbowButton>
+
+                      <Button
+                        variant="destructive"
+                        className={cn(
+                          "w-full max-w-xs bg-red-600 hover:bg-red-700 cursor-pointer"
+                        )}
+                        onClick={() => setSignOutDialog(true)}
+                      >
+                        Sign Out
+                      </Button>
                     </Link>
                   </>
                 )}
