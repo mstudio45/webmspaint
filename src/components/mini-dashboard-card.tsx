@@ -580,38 +580,6 @@ export default function MiniDashboardCard({
                       )}
                     </div>
 
-                    <AlertDialog
-                        open={getSignOutDialog}
-                        onOpenChange={setSignOutDialog}
-                      >
-                      <AlertDialogContent className="max-w-xl">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you sure you want to Sign out?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            You can sign in at anytime by going through{" "}<Link 
-                              className="text-blue-400 underline break-all" 
-                              href="/sign-in"
-                              target="_blank"
-                            >
-                              this link
-                            </Link>.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-                          <Button
-                            variant="destructive"
-                            className=" bg-red-600 hover:bg-red-700 cursor-pointer"
-                            onClick={signout}
-                          >
-                            Sign Out
-                          </Button>                          
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
                     <CardFooter className="w-full flex items-center justify-center text-muted-foreground text-xs font-medium mt-2 -mb-14">
                       User updated {lastSyncTimeText}
                     </CardFooter>
@@ -638,6 +606,38 @@ export default function MiniDashboardCard({
                     </Button>
                   </>
                 )}
+
+                <AlertDialog
+                    open={getSignOutDialog}
+                    onOpenChange={setSignOutDialog}
+                  >
+                  <AlertDialogContent className="max-w-xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure you want to Sign out?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You can sign in at anytime by going through{" "}<Link 
+                          className="text-blue-400 underline break-all" 
+                          href="/sign-in"
+                          target="_blank"
+                        >
+                          this link
+                        </Link>.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                      <Button
+                        variant="destructive"
+                        className=" bg-red-600 hover:bg-red-700 cursor-pointer"
+                        onClick={signout}
+                      >
+                        Sign Out
+                      </Button>                          
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </div>
