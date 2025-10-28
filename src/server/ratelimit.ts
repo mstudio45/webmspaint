@@ -91,6 +91,18 @@ export class RateLimitService {
     await redis.expire(key, Math.ceil(ttl / 1000)); // Convert ms to seconds
   }
 
+  public async deleteRequest(
+    endpoint: string,
+    identifier: string = ''
+  ): Promise<void> {
+    const key = `ratelimit:${endpoint}`;
+    const now = Date.now();
+    const expireAt = now - 1; // Set to past time so it's immediately expired
+    
+    await redis.zadd(key, { score: expireAt, member: `${identifier}:${now}` });
+    await redis.expire(key, 1); // Expire in 1 second
+  }
+
   public async getMetrics() {
     const now = Date.now();
     const results = [];
