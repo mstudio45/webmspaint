@@ -197,7 +197,7 @@ export default function MiniDashboardCard({
                 </p>
               </div>
 
-              <div className={isMember ? "" : "mb-5"}>
+              <div className={isMember ? "mb-5" : ""}>
                 {isMember ? (
                   <>
                     <div className="w-full flex justify-center sm:justify-start mt-2">
