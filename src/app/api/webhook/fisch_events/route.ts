@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     ],
   };
 
-  if (data.event in ImageMappings) {
+  if (data.event in ImageMappings && ImageMappings[data.event] !== "") {
     webhook_data.embeds[0].image = {
       url: ImageMappings[data.event],
     };
