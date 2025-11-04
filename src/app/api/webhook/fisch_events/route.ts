@@ -200,9 +200,9 @@ export async function POST(req: NextRequest) {
               data.cycle
             } ${
               data.cycle == "Day" ? "☀️" : "🌙"
-            }\n<:reply:1435289154983297074> **Server Uptime:** ${serverUptime(
+            }\n<:reply:1435289154983297074> **Uptime:** ||\`${serverUptime(
               data.uptime
-            )}`,
+            )}\`||`,
             inline: true,
           },
         ],
