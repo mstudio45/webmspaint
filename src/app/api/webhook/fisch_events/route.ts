@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: "error", error: error.issues });
   }
 
-  let webhook_data = {
+  const webhook_data = {
     content: "<@&1435283020046139574>",
     embeds: [
       {
