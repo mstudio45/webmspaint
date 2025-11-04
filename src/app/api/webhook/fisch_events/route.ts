@@ -62,17 +62,28 @@ const schema = z.object({
 function serverUptime(uptime: number) {
   const seconds = Math.floor(uptime);
 
-  // If less than 1 minute, show only seconds
+  // If less than 60 seconds, show seconds
   if (seconds < 60) {
     return `${seconds} seconds`;
   }
 
-  const hours = seconds / 3600; // Total hours with decimals
-  const minutes = Math.floor((seconds % 3600) / 60);
+  const minutes = seconds / 60;
 
-  return `${hours.toFixed(2)} hours ${minutes
-    .toString()
-    .padStart(2, "0")} minutes`;
+  // If less than 60 minutes, show minutes with 2 decimals
+  if (minutes < 60) {
+    return `${minutes.toFixed(2)} minutes`;
+  }
+
+  const hours = seconds / 3600;
+
+  // If less than 24 hours, show hours with 2 decimals
+  if (hours < 24) {
+    return `${hours.toFixed(2)} hours`;
+  }
+
+  // Otherwise show days with 2 decimals
+  const days = seconds / 86400;
+  return `${days.toFixed(2)} days`;
 }
 
 async function checkRateLimit(ip: string): Promise<boolean> {
