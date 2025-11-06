@@ -27,6 +27,7 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 			try { cb(); }
 			catch (err) {
 				if (process.env.NODE_ENV !== "production") {
+					// eslint-disable-next-line no-console
 					console.error("[UIState.notify] listener threw:", err);
 				}
 			}
