@@ -6,10 +6,9 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { gamesList } from "@/data/games";
 import type { ReactNode } from "react";
-import GateMount from "@/components/gate-mount";
 
 const description =
-  "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace, murder mystery 2 — and yes, Fortnite / Fortntie";
+  "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace and murder mystery 2";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -30,8 +29,6 @@ export const metadata: Metadata = {
     "working script",
     "2024",
     "2025",
-    "Fortnite",
-    "FORTNITE",
     ...gamesList,
   ],
 };
@@ -61,7 +58,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <GateMount>{children}</GateMount>
+          {children}
           <Toaster richColors />
           <Analytics />
         </ThemeProvider>
