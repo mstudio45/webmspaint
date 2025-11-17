@@ -168,8 +168,7 @@ export default async function TOS(props: {
             <p>
               - <strong>Content Rights</strong>: Unless explicitly stated
               otherwise, you retain rights to content you create using mspaint
-              products, subject to our non-exclusive license to use such content
-              for service improvement.
+              products.
             </p>
           </div>
 
@@ -228,7 +227,7 @@ export default async function TOS(props: {
           </p>
 
           <p className="text-center text-sm mt-4 text-gray-400">
-            Last Updated: September 8, 2025
+            Last Updated: November 17, 2025
           </p>
         </BlurFade>
       </div>
