@@ -3,9 +3,9 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
-import "./globals.css";
 import { gamesList } from "@/data/games";
 import type { ReactNode } from "react";
+import "./globals.css"
 
 const description =
   "mspaint is the best premium roblox script hub supporting games such as doors, 3008, room & doors, pressure, fisch, build a boat for treasure, grace and murder mystery 2";
@@ -50,6 +50,7 @@ export default function RootLayout({
       {/* <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head> */}
+
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider
           attribute="class"
