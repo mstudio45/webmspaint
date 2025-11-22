@@ -5,12 +5,18 @@ const nextConfig: NextConfig = {
 		// Cache optimized images longer to reduce optimizer hits
 		minimumCacheTTL: 2592000, // 30 days
 		remotePatterns: [
-			// Review avatars
+			// Discord avatars
 			{
 				protocol: "https",
 				hostname: "raw.githubusercontent.com",
 				pathname: "mspaint-cc/*"
 			},
+			{
+				protocol: "https",
+				hostname: "cdn.discordapp.com",
+				pathname: "avatars/*"
+			},
+
 			// Existing patterns
 			{
 				protocol: "https",

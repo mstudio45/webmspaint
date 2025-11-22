@@ -18,7 +18,7 @@ export default async function middleware(req: NextRequest) {
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://raw.githubusercontent.com/mspaint-cc/ https://utfs.io https://ob4fgkbb3w.ufs.sh https://q2p0njok3b.ufs.sh;
+    img-src 'self' blob: data: https://cdn.discordapp.com/avatars/ https://raw.githubusercontent.com/mspaint-cc/ https://utfs.io https://ob4fgkbb3w.ufs.sh https://q2p0njok3b.ufs.sh;
     font-src 'self' data:;
     connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://raw.githubusercontent.com/mspaint-cc/;
     object-src 'none';
