@@ -24,7 +24,7 @@ export default async function middleware(req: NextRequest) {
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors 'self';
+    frame-ancestors 'self' https://shop.mspaint.cc https://mspaint.cc;
   `.replace(/\s{2,}/g, ' ').trim()
   
   // response
