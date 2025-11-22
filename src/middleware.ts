@@ -15,8 +15,8 @@ export default async function middleware(req: NextRequest) {
   }
 
   const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
+    default-src 'none';
+    script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://cdn.discordapp.com/avatars/ https://raw.githubusercontent.com/mspaint-cc/ https://utfs.io https://ob4fgkbb3w.ufs.sh https://q2p0njok3b.ufs.sh;
     font-src 'self' data:;
