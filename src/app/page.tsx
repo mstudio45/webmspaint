@@ -209,7 +209,7 @@ export default async function Home() {
                   <Executor
                     name={"Seliware"}
                     image={
-                      "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsfZjhFPc93HZnPaFmTiUcpydAzsQLVK54BWrO"
+                      "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs2M1WsFKsE4uqeKTGPFHJZhdvYVzSAOgb9aty"
                     }
                     url={"https://seliware.com"}
                   />

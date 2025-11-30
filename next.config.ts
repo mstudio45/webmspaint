@@ -128,7 +128,7 @@ const nextConfig: NextConfig = {
 			{
 				protocol: "https",
 				hostname: "q2p0njok3b.ufs.sh",
-				pathname: "/f/Z155p1jPvLAsfZjhFPc93HZnPaFmTiUcpydAzsQLVK54BWrO",
+				pathname: "/f/Z155p1jPvLAs2M1WsFKsE4uqeKTGPFHJZhdvYVzSAOgb9aty",
 			},
 			{
 				protocol: "https",
