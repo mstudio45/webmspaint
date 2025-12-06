@@ -20,7 +20,14 @@ export async function GET(req: NextRequest, slug: { params: Promise<{ slug: stri
     
     // get from github //
     try {
-        const response = await fetch(`https://raw.githubusercontent.com/${segments.join("/")}`, {
+        let URL = "";
+        if (segments[2] === "releases") {
+            URL = `https://github.com/${segments.join("/")}`;
+        } else {
+            URL = `https://raw.githubusercontent.com/${segments.join("/")}`;
+        }
+
+        const response = await fetch(URL, {
             method: "GET",
             cache: "force-cache",
             next: {
