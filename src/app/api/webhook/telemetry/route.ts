@@ -4,8 +4,13 @@ import z from "zod";
 
 const schema = z.object({
     exec: z.string(),
+    execver: z.string().nullable(),
+
     placeid: z.number(),
-    gameid: z.number()
+    gameid: z.number(),
+
+    loading: z.boolean().nullable(),
+    failed: z.boolean().nullable()
 })
 
 export async function POST(req: NextRequest) {
