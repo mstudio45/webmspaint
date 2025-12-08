@@ -109,7 +109,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-type SortField = "placeid" | "count" | "percentage" | "gameid" | "exec";
+type SortField = "placeid" | "count" | "percentage" | "gameid" | "exec" | "failedPercentage";
 type SortDirection = "asc" | "desc";
 type GameData = RobloxGameResponse["data"][0] | null;
 
@@ -535,18 +535,26 @@ export function AnalyticsClient() {
 
   // executor
   const executorCounts = telemetryData.reduce(
-    (acc: Record<string, number>, item: { exec: string }) => {
-      acc[item.exec] = (acc[item.exec] || 0) + 1;
+    (acc: Record<string, { total: number; failed: number }>, item: { exec: string; failed?: boolean }) => {
+      if (!acc[item.exec]) {
+        acc[item.exec] = { total: 0, failed: 0 };
+      }
+      acc[item.exec].total += 1;
+      if (item.failed === true) {
+        acc[item.exec].failed += 1;
+      }
       return acc;
     },
     {}
   );
 
   const executorDistributionArray = Object.entries(executorCounts).map(
-    ([exec, count]) => ({
+    ([exec, data]) => ({
       exec,
-      count,
-      percentage: (count / filteredTotalCount) * 100,
+      count: data.total,
+      percentage: (data.total / filteredTotalCount) * 100,
+      failedCount: data.failed,
+      failedPercentage: data.total > 0 ? (data.failed / data.total) * 100 : 0,
     })
   );
 
@@ -562,6 +570,11 @@ export function AnalyticsClient() {
           ? a.count - b.count
           : b.count - a.count;
 
+      } else if (executorsSortField === "failedPercentage") {
+        return executorsSortDirection === "asc"
+          ? a.failedPercentage - b.failedPercentage
+          : b.failedPercentage - a.failedPercentage;
+      
       } else {
         // percentage
         return executorsSortDirection === "asc"
@@ -1004,10 +1017,30 @@ export function AnalyticsClient() {
                       </TableBody>
                     </Table>
 
-                    {/* Pagination controls */}
-                    {placeTotalPages > 1 && (
-                      <div className="mt-4">
-                        <Pagination>
+                    {/* Place Pagination controls */}
+                    {placeTotalPages > 0 && (
+                      <div className="mt-4 flex items-center relative">
+                        <div className="flex items-center mr-4 absolute left-0">
+                          <span className="mr-2 text-sm text-muted-foreground">
+                            Items per page:
+                          </span>
+                          <input
+                            type="number"
+                            min="5"
+                            max="100"
+                            value={placeItemsPerPage}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (value >= 5 && value <= 100) {
+                                setPlaceItemsPerPage(value);
+                                setPlaceCurrentPage(1);
+                              }
+                            }}
+                            className="w-16 h-8 rounded-md border border-input px-2 text-sm"
+                          />
+                        </div>
+
+                        <Pagination className="ml-auto">
                           <PaginationContent>
                             <PaginationItem>
                               <PaginationPrevious
@@ -1094,28 +1127,13 @@ export function AnalyticsClient() {
                             </PaginationItem>
                           </PaginationContent>
                         </Pagination>
-
-                        <div className="flex items-center mr-4 absolute left-0">
-                          <span className="mr-2 text-sm text-muted-foreground">
-                            Items per page:
-                          </span>
-                          <input
-                            type="number"
-                            min="5"
-                            max="100"
-                            value={placeCurrentPage}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (value >= 5 && value <= 100) {
-                                setPlaceItemsPerPage(value);
-                                setPlaceCurrentPage(1); // Reset to first page
-                              }
-                            }}
-                            className="w-16 h-8 rounded-md border border-input px-2 text-sm"
-                          />
-                        </div>
                       </div>
                     )}
+
+                    <div className="text-center text-sm text-muted-foreground mt-2">
+                      Showing {placeIndexOfFirstItem + 1}-{Math.min(placeIndexOfLastItem, placeDistributionArray.length)} of{" "}
+                      {placeDistributionArray.length} items
+                    </div>
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-[200px]">
@@ -1168,11 +1186,21 @@ export function AnalyticsClient() {
                               Percentage {executorsRenderSortIcon("percentage")}
                             </div>
                           </TableHead>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50 text-right"
+                            onClick={() =>
+                              executorsHandleSortClick("failedPercentage")
+                            }
+                          >
+                            <div className="flex items-center justify-end">
+                              Failed Percentage {executorsRenderSortIcon("failedPercentage")}
+                            </div>
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {executorsCurrentItems.map(
-                          ({ exec, count, percentage }) => (
+                          ({ exec, count, percentage, failedCount, failedPercentage }) => (
                             <TableRow key={exec}>
                               <TableCell className="text-left">
                                 {exec}
@@ -1183,16 +1211,39 @@ export function AnalyticsClient() {
                               <TableCell className="text-right">
                                 {percentage.toFixed(1)}%
                               </TableCell>
+                              <TableCell className="text-right">
+                                {failedPercentage.toFixed(1)}% ({failedCount.toLocaleString(navigator?.language ?? "en-US")}/{count.toLocaleString(navigator?.language ?? "en-US")})
+                              </TableCell>
                             </TableRow>
                           )
                         )}
                       </TableBody>
                     </Table>
 
-                    {/* Pagination controls */}
-                    {executorsTotalPages > 1 && (
-                      <div className="mt-4">
-                        <Pagination>
+                    {/* Executors Pagination controls */}
+                    {executorsTotalPages > 0 && (
+                      <div className="mt-4 flex items-center relative">
+                        <div className="flex items-center mr-4 absolute left-0">
+                          <span className="mr-2 text-sm text-muted-foreground">
+                            Items per page:
+                          </span>
+                          <input
+                            type="number"
+                            min="5"
+                            max="100"
+                            value={executorsItemsPerPage}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (value >= 5 && value <= 100) {
+                                setExecutorsItemsPerPage(value);
+                                setExecutorsCurrentPage(1);
+                              }
+                            }}
+                            className="w-16 h-8 rounded-md border border-input px-2 text-sm"
+                          />
+                        </div>
+
+                        <Pagination className="ml-auto">
                           <PaginationContent>
                             <PaginationItem>
                               <PaginationPrevious
@@ -1279,28 +1330,13 @@ export function AnalyticsClient() {
                             </PaginationItem>
                           </PaginationContent>
                         </Pagination>
-
-                        <div className="flex items-center mr-4 absolute left-4">
-                          <span className="mr-2 text-sm text-muted-foreground">
-                            Items per page:
-                          </span>
-                          <input
-                            type="number"
-                            min="5"
-                            max="100"
-                            value={executorsCurrentPage}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (value >= 5 && value <= 100) {
-                                setExecutorsItemsPerPage(value);
-                                setExecutorsCurrentPage(1); // Reset to first page
-                              }
-                            }}
-                            className="w-16 h-8 rounded-md border border-input px-2 text-sm"
-                          />
-                        </div>
                       </div>
                     )}
+
+                    <div className="text-center text-sm text-muted-foreground mt-2">
+                      Showing {executorsIndexOfFirstItem + 1}-{Math.min(executorsIndexOfLastItem, executorDistributionArray.length)} of{" "}
+                      {executorDistributionArray.length} items
+                    </div>
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-[200px]">
