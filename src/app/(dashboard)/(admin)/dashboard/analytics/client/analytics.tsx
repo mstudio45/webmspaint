@@ -258,7 +258,7 @@ function GameInfoComponent({
   }
 
   // Handle error/not found
-  if (!data) {
+  if (!(data && data.rootPlaceId)) {
     return (
       <Card className="px-2 py-2 flex flex-row justify-center items-center gap-2 max-w-[500px]">
         <div>
@@ -276,6 +276,16 @@ function GameInfoComponent({
               },
             ]}
           />
+          {placeid && <a
+            href={`https://www.roblox.com/games/${placeid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline" size={"sm"}>
+              <LinkIcon className="mr-2 h-4 w-4" />
+              View on Roblox
+            </Button>
+          </a>}
         </div>
       </Card>
     );
@@ -295,7 +305,7 @@ function GameInfoComponent({
           </div>
           <div className="flex flex-row text-xs items-center text-muted-foreground">
             <StarIcon className="h-4 w-4" />
-            {data.favoritedCount?.toLocaleString() || 0}
+            {data.favoritedCount?.toLocaleString(navigator?.language ?? "en-US") || 0}
           </div>
         </div>
       </div>
@@ -333,13 +343,12 @@ export function AnalyticsClient() {
     hasMore,
     isLoading,
     stats,
-    fetchTelemetryData,
-    fetchStats,
+    fetchTelemetryData
   } = useAnalytics();
 
   const [timeFilter, setTimeFilter] = useState<string>("all");
 
-  // Sorting state for place distribution table
+  // places
   const [placeSortField, setPlaceSortField] = useState<SortField>("count");
   const [placeSortDirection, setPlaceSortDirection] =
     useState<SortDirection>("desc");
@@ -352,19 +361,9 @@ export function AnalyticsClient() {
   const [executorsCurrentPage, setExecutorsCurrentPage] = useState(1);
   const [executorsItemsPerPage, setExecutorsItemsPerPage] = useState(10);
 
-  // Add pagination state for raw data table
+  // pages
   const [rawDataCurrentPage, setRawDataCurrentPage] = useState(1);
   const [rawDataItemsPerPage, setRawDataItemsPerPage] = useState(10);
-
-  const memoizedLoadDataWithTimeFilter = useCallback(loadDataWithTimeFilter, [
-    fetchTelemetryData,
-  ]);
-
-  useEffect(() => {
-    // Initial data load
-    memoizedLoadDataWithTimeFilter(timeFilter);
-    fetchStats(true);
-  }, [fetchStats, timeFilter, memoizedLoadDataWithTimeFilter]);
 
   function loadDataWithTimeFilter(timeRange: string) {
     const now = Date.now();
@@ -386,25 +385,24 @@ export function AnalyticsClient() {
       default:
         // "all" case - no filter
         startDate = undefined;
+        break;
     }
 
     fetchTelemetryData({
       limit: 100,
-      startDate,
-      silent: true,
+      startDate
     });
 
     setTimeFilter(timeRange);
   }
 
-  // Prepare data for charts with proper formatting
   const prepareChartData = () => {
     if (!telemetryData.length) return [];
 
     const groupedByDate = telemetryData.reduce<
       Record<string, { count: number }>
     >((acc, item) => {
-      const date = new Date(item.timestamp).toISOString().split("T")[0]; // Format as YYYY-MM-DD
+      const date = new Date(item.timestamp).toISOString().split("T")[0]; // YYYY-MM-DD
       if (!acc[date]) {
         acc[date] = { count: 0 };
       }
@@ -445,8 +443,6 @@ export function AnalyticsClient() {
     return placeAcc;
   }, {});
 
-  // Convert to array for sorting
-  // Calculate total count for filtered data
   const filteredTotalCount = Object.values(placeIdDistribution).reduce(
     (sum, item) => sum + item.count, 
     0
@@ -461,20 +457,22 @@ export function AnalyticsClient() {
     })
   );
 
-  // Sort the place distribution array
   const placeSortedDistribution = [...placeDistributionArray].sort((a, b) => {
     if (placeSortField === "placeid") {
       return placeSortDirection === "asc"
         ? a.placeid - b.placeid
         : b.placeid - a.placeid;
+
     } else if (placeSortField === "count") {
       return placeSortDirection === "asc"
         ? a.count - b.count
         : b.count - a.count;
+
     } else if (placeSortField === "gameid") {
       return placeSortDirection === "asc"
         ? a.gameid - b.gameid
         : b.gameid - a.gameid;
+
     } else {
       return placeSortDirection === "asc"
         ? a.percentage - b.percentage
@@ -482,7 +480,10 @@ export function AnalyticsClient() {
     }
   });
 
-  // Calculate pagination bounds
+  // pagination bounds
+  const placePageNumbers = [];
+  const placeMaxPageButtons = 5;
+
   const placeIndexOfLastItem = placeCurrentPage * placeItemsPerPage;
   const placeIndexOfFirstItem = placeIndexOfLastItem - placeItemsPerPage;
   const placeCurrentItems = placeSortedDistribution.slice(
@@ -493,14 +494,6 @@ export function AnalyticsClient() {
     placeSortedDistribution.length / placeItemsPerPage
   );
 
-  // Function to change page
-  const placePaginate = (placePageNumber: number) =>
-    setPlaceCurrentPage(placePageNumber);
-
-  // Generate page numbers
-  const placePageNumbers = [];
-  const placeMaxPageButtons = 5; // Show max 5 page buttons
-
   let placeStartPage = Math.max(
     1,
     placeCurrentPage - Math.floor(placeMaxPageButtons / 2)
@@ -510,7 +503,6 @@ export function AnalyticsClient() {
     placeStartPage + placeMaxPageButtons - 1
   );
 
-  // Adjust if we're near the end
   if (
     placeEndPage - placeStartPage + 1 < placeMaxPageButtons &&
     placeStartPage > 1
@@ -522,19 +514,14 @@ export function AnalyticsClient() {
     placePageNumbers.push(i);
   }
 
-  // Handle sort click
+  const placePaginate = (placePageNumber: number) => setPlaceCurrentPage(placePageNumber);
+  
+  // sort clicking
   const placeHandleSortClick = (field: SortField) => {
-    if (placeSortField === field) {
-      // Toggle direction if clicking the same field
-      setPlaceSortDirection(placeSortDirection === "asc" ? "desc" : "asc");
-    } else {
-      // Default to descending for new field
-      setPlaceSortField(field);
-      setPlaceSortDirection("desc");
-    }
+    if (placeSortField !== field) setPlaceSortField(field);
+    setPlaceSortDirection(placeSortDirection === "asc" ? "desc" : "asc");
   };
 
-  // Render sort icon
   const placeRenderSortIcon = (field: SortField) => {
     if (placeSortField !== field) {
       return <ChevronDown className="h-4 w-4 opacity-50" />;
@@ -555,7 +542,6 @@ export function AnalyticsClient() {
     {}
   );
 
-  // Convert to array for sorting
   const executorDistributionArray = Object.entries(executorCounts).map(
     ([exec, count]) => ({
       exec,
@@ -564,17 +550,18 @@ export function AnalyticsClient() {
     })
   );
 
-  // Sort the executor distribution array
   const sortedExecutorsDistribution = [...executorDistributionArray].sort(
     (a, b) => {
       if (executorsSortField === "exec") {
         return executorsSortDirection === "asc"
           ? a.exec.localeCompare(b.exec)
           : b.exec.localeCompare(a.exec);
+
       } else if (executorsSortField === "count") {
         return executorsSortDirection === "asc"
           ? a.count - b.count
           : b.count - a.count;
+
       } else {
         // percentage
         return executorsSortDirection === "asc"
@@ -584,10 +571,12 @@ export function AnalyticsClient() {
     }
   );
 
-  // Calculate pagination bounds
+  // executor pagination bounds
+  const executorsPageNumbers = [];
+  const executorsMaxPageButtons = 5;
+
   const executorsIndexOfLastItem = executorsCurrentPage * executorsItemsPerPage;
-  const executorsIndexOfFirstItem =
-    executorsIndexOfLastItem - executorsItemsPerPage;
+  const executorsIndexOfFirstItem = executorsIndexOfLastItem - executorsItemsPerPage;
   const executorsCurrentItems = sortedExecutorsDistribution.slice(
     executorsIndexOfFirstItem,
     executorsIndexOfLastItem
@@ -595,14 +584,6 @@ export function AnalyticsClient() {
   const executorsTotalPages = Math.ceil(
     sortedExecutorsDistribution.length / executorsItemsPerPage
   );
-
-  // Function to change page
-  const executorsPaginate = (executorsPageNumber: number) =>
-    setExecutorsCurrentPage(executorsPageNumber);
-
-  // Generate page numbers
-  const executorsPageNumbers = [];
-  const executorsMaxPageButtons = 5; // Show max 5 page buttons
 
   let executorsStartPage = Math.max(
     1,
@@ -613,7 +594,6 @@ export function AnalyticsClient() {
     executorsStartPage + executorsMaxPageButtons - 1
   );
 
-  // Adjust if we're near the end
   if (
     executorsEndPage - executorsStartPage + 1 < executorsMaxPageButtons &&
     executorsStartPage > 1
@@ -628,21 +608,12 @@ export function AnalyticsClient() {
     executorsPageNumbers.push(i);
   }
 
-  // Handle sort click
+  const executorsPaginate = (executorsPageNumber: number) => setExecutorsCurrentPage(executorsPageNumber);
   const executorsHandleSortClick = (field: SortField) => {
-    if (executorsSortField === field) {
-      // Toggle direction if clicking the same field
-      setExecutorsSortDirection(
-        executorsSortDirection === "asc" ? "desc" : "asc"
-      );
-    } else {
-      // Default to descending for new field
-      setExecutorsSortField(field);
-      setExecutorsSortDirection("desc");
-    }
+    if (executorsSortField !== field) setExecutorsSortField(field);
+    setExecutorsSortDirection(executorsSortDirection === "asc" ? "desc" : "asc");
   };
 
-  // Render sort icon
   const executorsRenderSortIcon = (field: SortField) => {
     if (executorsSortField !== field) {
       return <ChevronDown className="h-4 w-4 opacity-50" />;
@@ -654,7 +625,7 @@ export function AnalyticsClient() {
     );
   };
 
-  // Chart configuration for Shadcn charts
+  // chart data
   const chartConfig = {
     count: {
       label: "Executions",
@@ -662,7 +633,10 @@ export function AnalyticsClient() {
     },
   } satisfies ChartConfig;
 
-  // Calculate pagination for raw data table
+  // pagination for raw data table
+  const rawDataPageNumbers = [];
+  const maxRawDataPageButtons = 5;
+
   const rawDataTotalPages = Math.ceil(
     telemetryData.length / rawDataItemsPerPage
   );
@@ -676,10 +650,6 @@ export function AnalyticsClient() {
     rawDataEndIndex
   );
 
-  // Generate page numbers for raw data pagination
-  const rawDataPageNumbers = [];
-  const maxRawDataPageButtons = 5; // Show max 5 page buttons
-
   let rawDataStartPage = Math.max(
     1,
     rawDataCurrentPage - Math.floor(maxRawDataPageButtons / 2)
@@ -689,7 +659,6 @@ export function AnalyticsClient() {
     rawDataStartPage + maxRawDataPageButtons - 1
   );
 
-  // Adjust if we're near the end
   if (
     rawDataEndPage - rawDataStartPage + 1 < maxRawDataPageButtons &&
     rawDataStartPage > 1
@@ -701,9 +670,7 @@ export function AnalyticsClient() {
     rawDataPageNumbers.push(i);
   }
 
-  // Function to paginate raw data
-  const paginateRawData = (pageNumber: number) =>
-    setRawDataCurrentPage(pageNumber);
+  const paginateRawData = (pageNumber: number) => setRawDataCurrentPage(pageNumber);
 
   return (
     <GameCacheProvider>
@@ -734,7 +701,7 @@ export function AnalyticsClient() {
           <div className="flex items-center gap-2">
             <Select
               value={timeFilter}
-              onValueChange={memoizedLoadDataWithTimeFilter}
+              onValueChange={loadDataWithTimeFilter}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select time range" />
@@ -751,8 +718,7 @@ export function AnalyticsClient() {
             <Button
               variant="outline"
               onClick={() => {
-                memoizedLoadDataWithTimeFilter(timeFilter);
-                fetchStats(false);
+                loadDataWithTimeFilter(timeFilter);
               }}
               disabled={isLoading}
             >
@@ -777,7 +743,7 @@ export function AnalyticsClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalCount}</div>
+                  <div className="text-2xl font-bold">{stats.totalCount.toLocaleString(navigator?.language ?? "en-US")}</div>
                 </CardContent>
               </Card>
 
@@ -789,7 +755,7 @@ export function AnalyticsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats.uniquePlaceIds}
+                    {stats.uniquePlaceIds.toLocaleString(navigator?.language ?? "en-US")}
                   </div>
                 </CardContent>
               </Card>
@@ -802,7 +768,7 @@ export function AnalyticsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats.uniqueGameIds}
+                    {stats.uniqueGameIds.toLocaleString(navigator?.language ?? "en-US")}
                   </div>
                 </CardContent>
               </Card>
@@ -815,7 +781,7 @@ export function AnalyticsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats.uniqueExecutors}
+                    {stats.uniqueExecutors.toLocaleString(navigator?.language ?? "en-US")}
                   </div>
                 </CardContent>
               </Card>
@@ -829,7 +795,7 @@ export function AnalyticsClient() {
                 <CardContent>
                   <div className="text-lg font-medium">
                     {stats.mostRecentTimestamp
-                      ? new Date(stats.mostRecentTimestamp).toLocaleString()
+                      ? new Date(stats.mostRecentTimestamp).toLocaleString(navigator?.language ?? "en-US")
                       : "No activity"}
                   </div>
                 </CardContent>
@@ -930,7 +896,7 @@ export function AnalyticsClient() {
                         minTickGap={32}
                         tickFormatter={(value) => {
                           const date = new Date(value);
-                          return date.toLocaleDateString("en-US", {
+                          return date.toLocaleDateString(navigator?.language ?? "en-US", {
                             month: "short",
                             day: "numeric",
                           });
@@ -942,7 +908,7 @@ export function AnalyticsClient() {
                           <ChartTooltipContent
                             labelFormatter={(value) => {
                               return new Date(value).toLocaleDateString(
-                                "en-US",
+                                navigator?.language ?? "en-US",
                                 {
                                   month: "long",
                                   day: "numeric",
@@ -1365,7 +1331,7 @@ export function AnalyticsClient() {
                             <TableHead>Executor</TableHead>
                             <TableHead>Game</TableHead>
                             <TableHead>Timestamp</TableHead>
-                            <TableHead>Failed</TableHead>
+                            <TableHead>Loaded</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1381,11 +1347,11 @@ export function AnalyticsClient() {
                                 />
                               </TableCell>
                               <TableCell>
-                                {new Date(item.timestamp).toLocaleString()}
+                                {new Date(item.timestamp).toLocaleString(navigator?.language ?? "en-US")}
                               </TableCell>
-                              <TableCell>
+                              {typeof item.failed != "boolean" ? <TableCell>No Data</TableCell> : <TableCell>
                                 {item.failed == true ? "❌" : "✔️"} — {item.loading == true ? "Game" : "Loader"}
-                              </TableCell>
+                              </TableCell>}
                             </TableRow>
                           ))}
                         </TableBody>
@@ -1526,10 +1492,7 @@ export function AnalyticsClient() {
                       fetchTelemetryData({
                         limit: 20,
                         offset: telemetryData.length,
-                        startDate:
-                          timeFilter !== "all"
-                            ? getStartDateFromFilter(timeFilter)
-                            : undefined,
+                        startDate: timeFilter !== "all" ? getStartDateFromFilter(timeFilter) : undefined
                       })
                     }
                     disabled={isLoading}

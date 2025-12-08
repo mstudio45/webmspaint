@@ -14,7 +14,12 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const cspHeader = `
+  // response
+  const response = NextResponse.next()
+  const isProd = process.env.NODE_ENV == "production";
+
+  if (isProd) {
+    const cspHeader = `
     default-src 'none';
     script-src 'self' 'unsafe-inline' https://www.mspaint.cc https://mspaint.cc https://cdn.vercel-insights.com https://vercel.live https://va.vercel-scripts.com;
     style-src 'self' 'unsafe-inline';
@@ -25,13 +30,12 @@ export default async function middleware(req: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'self' https://shop.mspaint.cc https://www.mspaint.cc https://mspaint.cc;
-  `.replace(/\s{2,}/g, ' ').trim()
-  
-  // response
-  const response = NextResponse.next()
-  response.headers.set("X-Content-Type-Options", "nosniff")
-  response.headers.set("X-Frame-Options", "SAMEORIGIN")
-  response.headers.set("Content-Security-Policy", cspHeader)
+    `.replace(/\s{2,}/g, ' ').trim()
+    
+    response.headers.set("X-Content-Type-Options", "nosniff")
+    response.headers.set("X-Frame-Options", "SAMEORIGIN")
+    response.headers.set("Content-Security-Policy", cspHeader)
+  }
   
   return response
 }

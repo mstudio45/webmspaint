@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { getTelemetryData, getTelemetryStats, TelemetryData } from "../analyticsserver";
+import { getTelemetryData, TelemetryData } from "../analyticsserver";
 import { toast } from "sonner";
 
 interface AnalyticsContextType {
@@ -25,7 +25,6 @@ interface AnalyticsContextType {
     gameId?: number;
     silent?: boolean;
   }) => Promise<void>;
-  fetchStats: (silent?: boolean) => Promise<void>;
 }
 
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
@@ -45,14 +44,16 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
     gameId?: number;
     silent?: boolean;
   }) => {
+    const { silent = false, ...queryOptions } = options || {};
+
     setIsLoading(true);
-    
-    const { silent = true, ...queryOptions } = options || {};
-    
+    console.log('Loading telemetry data...')
+
     if (silent) {
       try {
         const result = await getTelemetryData(queryOptions);
         setTelemetryData(result.data);
+        setStats(result.stats);
         setTotalCount(result.totalCount);
       } catch (error) {
         console.error("Error fetching telemetry data:", error);
@@ -65,6 +66,7 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
           try {
             const result = await getTelemetryData(queryOptions);
             setTelemetryData(result.data);
+            setStats(result.stats);
             setTotalCount(result.totalCount);
             return result;
           } catch (error) {
@@ -83,51 +85,15 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const fetchStats = useCallback(async (silent: boolean = true) => {
-    setIsLoading(true);
-    
-    if (silent) {
-      try {
-        const result = await getTelemetryStats();
-        setStats(result);
-      } catch (error) {
-        console.error("Error fetching telemetry stats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      toast.promise(
-        async () => {
-          try {
-            const result = await getTelemetryStats();
-            setStats(result);
-            return result;
-          } catch (error) {
-            console.error("Error fetching telemetry stats:", error);
-            throw error;
-          } finally {
-            setIsLoading(false);
-          }
-        },
-        {
-          loading: 'Loading analytics stats...',
-          success: 'Analytics stats loaded successfully!',
-          error: 'Failed to load analytics stats.'
-        }
-      );
-    }
-  }, []);
-
   return (
     <AnalyticsContext.Provider
       value={{
         telemetryData,
+        stats,
         totalCount,
         hasMore: false,
         isLoading,
-        stats,
-        fetchTelemetryData,
-        fetchStats
+        fetchTelemetryData
       }}
     >
       {children}

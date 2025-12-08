@@ -107,7 +107,7 @@ export default function ModifySubscriptionComponent() {
             {currentExpiration && (
               <>
                 <p className="text-sm font-medium">Current Expiration:</p>
-                <p>{currentExpiration.toLocaleString()}</p>
+                <p>{currentExpiration.toLocaleString(navigator?.language ?? "en-US")}</p>
               </>
             )}
           </div>
@@ -185,7 +185,7 @@ export default function ModifySubscriptionComponent() {
           {newExpirationPreview && (
             <div className="mb-4">
               <p className="text-sm font-medium">New Expiration:</p>
-              <p>{newExpirationPreview.toLocaleString()}</p>
+              <p>{newExpirationPreview.toLocaleString(navigator?.language ?? "en-US")}</p>
             </div>
           )}
         </AlertDialogHeader>

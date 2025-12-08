@@ -436,7 +436,7 @@ export default function MiniDashboardCard({
                                           Date:{" "}
                                           {new Date(
                                             purchase.claimed_at
-                                          ).toLocaleDateString()}
+                                          ).toLocaleDateString(navigator?.language ?? "en-US")}
                                         </p>
 
                                         {purchase.key_duration ? (

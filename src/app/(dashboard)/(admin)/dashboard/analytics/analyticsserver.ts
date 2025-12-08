@@ -12,9 +12,150 @@ export type TelemetryData = {
   failed: boolean;
 };
 
-/**
- * Retrieves telemetry data with pagination and filtering options
+type StatsData = {
+  totalCount: number;
+  filteredCount: number;
+  uniquePlaceIds: number;
+  uniqueGameIds: number;
+  uniqueExecutors: number;
+  mostRecentTimestamp: number | null;
+};
+
+const PARALLEL_WORKERS = 25;
+
+/*
+ * Get telemetry data
  */
+async function pullTelemetryData({
+  endDate,
+}: {
+  endDate?: number;
+}): Promise<TelemetryData[]> {
+  const totalCount = await kv.scard('telemetryv2:all-keys');
+  if (totalCount === 0) {
+    return [];
+  }
+  
+  const CHUNK_SIZE = Math.ceil(totalCount / PARALLEL_WORKERS);
+  const workerPromises = Array.from({ length: PARALLEL_WORKERS }, async (_, workerIndex) => {
+    const workerData: TelemetryData[] = [];
+
+    let cursor = workerIndex * CHUNK_SIZE;
+    let itemsCollected = 0;
+    let batchCount = 0;
+
+    do {
+      const [newCursor, batch] = await kv.sscan(
+        'telemetryv2:all-keys',
+        cursor,
+        { count: 10000 }
+      );
+      
+      const batchData = batch as unknown as TelemetryData[];
+      const remainingNeeded = CHUNK_SIZE - itemsCollected;
+      if (remainingNeeded <= 0 && workerIndex < PARALLEL_WORKERS - 1) break;
+      
+      const itemsToTake = Math.min(batchData.length, remainingNeeded);
+      workerData.push(...batchData.slice(0, itemsToTake));
+      itemsCollected += itemsToTake;
+      
+      cursor = parseInt(newCursor);
+      batchCount++;
+
+      if (endDate !== undefined && batchData.some(item => item.timestamp > endDate)) break;
+      if (itemsCollected >= CHUNK_SIZE && workerIndex < PARALLEL_WORKERS - 1) break;
+    } while (cursor !== 0);
+    
+    return workerData;
+  });
+  
+  const results = await Promise.all(workerPromises);
+  const allKeys = results.flat();
+  allKeys.sort((a, b) => b.timestamp - a.timestamp);
+
+  return allKeys;
+}
+
+/**
+ * Filter telemetry data
+ */
+export async function getTelemetryData({
+  startDate,
+  endDate,
+  placeId,
+  gameId
+}: {
+  startDate?: number;
+  endDate?: number;
+  placeId?: number;
+  gameId?: number;
+} = {}): Promise<{
+  data: TelemetryData[];
+  stats: StatsData;
+  totalCount: number;
+  filteredCount: number;
+}> {
+  try {
+    const allKeys: TelemetryData[] = await pullTelemetryData({ endDate });
+    const totalCount = allKeys.length;
+
+    let validData = allKeys.filter((item): item is TelemetryData => item !== null);
+    const filteredCount = validData.length;
+    
+    // statistics //
+    let stats: StatsData = {
+      totalCount: 0,
+      filteredCount: 0,
+      uniquePlaceIds: 0,
+      uniqueGameIds: 0,
+      uniqueExecutors: 0,
+      mostRecentTimestamp: null
+    };
+    if (allKeys.length > 0) {
+      const placeIds = new Set(validData.map(item => item.placeid));
+      const executors = new Set(validData.map(item => item.exec));
+      const gameIds = new Set(validData.map(item => item.gameid));
+      const timestamps = validData.map(item => item.timestamp);
+      
+      stats = {
+        totalCount,
+        filteredCount,
+        uniquePlaceIds: placeIds.size,
+        uniqueGameIds: gameIds.size,
+        uniqueExecutors: executors.size,
+        mostRecentTimestamp: timestamps.length > 0 ? timestamps.reduce((a, b) => Math.max(a, b), -Infinity) : null,
+      };
+    }
+    
+    // data //
+    if (startDate || endDate || placeId !== undefined || gameId !== undefined) {
+      validData = validData.filter(data => {
+        if (startDate && data.timestamp < startDate) return false;
+        if (endDate && data.timestamp > endDate) return false;
+        if (placeId !== undefined && data.placeid !== placeId) return false;
+        if (gameId !== undefined && data.gameid !== gameId) return false;
+        return true;
+      });
+    }
+    
+    return {
+      data: validData,
+      stats,
+      totalCount,
+      filteredCount
+    };
+  } catch (err) {
+    throw new Error("Failed to retrieve telemetry data");
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 export async function getTelemetryDatav1({
   startDate,
   endDate,
@@ -45,7 +186,6 @@ export async function getTelemetryDatav1({
       for (const key of allKeys) {
         const data = await kv.get(key) as TelemetryData | null;
         if (data) {
-          // No need to JSON.parse - KV already returns the deserialized object
           let includeItem = true;
           
           if (startDate && data.timestamp < startDate) includeItem = false;
@@ -53,9 +193,7 @@ export async function getTelemetryDatav1({
           if (placeId !== undefined && data.placeid !== placeId) includeItem = false;
           if (gameId !== undefined && data.gameid !== gameId) includeItem = false;
           
-          if (includeItem) {
-            filteredKeys.push(key);
-          }
+          if (includeItem) filteredKeys.push(key);
         }
       }
       
@@ -89,9 +227,6 @@ export async function getTelemetryDatav1({
   }
 }
 
-/**
- * Gets telemetry statistics
- */
 export async function getTelemetryStatsv1(): Promise<{
   totalCount: number;
   uniquePlaceIds: number;
@@ -115,7 +250,6 @@ export async function getTelemetryStatsv1(): Promise<{
     
     const telemetryData = await Promise.all(
       allKeys.map(async (key) => {
-        // No need to JSON.parse - KV already returns the deserialized object
         return await kv.get(key) as TelemetryData | null;
       })
     );
@@ -125,138 +259,6 @@ export async function getTelemetryStatsv1(): Promise<{
     const placeIds = new Set(validData.map(item => item.placeid));
     const gameIds = new Set(validData.map(item => item.gameid));
     const executors = new Set(validData.map(item => item.exec));
-    const timestamps = validData.map(item => item.timestamp);
-    
-    return {
-      totalCount: validData.length,
-      uniquePlaceIds: placeIds.size,
-      uniqueGameIds: gameIds.size,
-      uniqueExecutors: executors.size,
-      mostRecentTimestamp: timestamps.length > 0 ? timestamps.reduce((a, b) => Math.max(a, b), -Infinity) : null
-    };
-  } catch (err) {
-    console.error("Failed to retrieve telemetry stats:", err);
-    throw new Error("Failed to retrieve telemetry statistics");
-  }
-}
-
-/**
- * Pull all telemetry keys statistics by batches to avoid size limit exception.
- */
-async function pullTelemetryData(): Promise<TelemetryData[]> {
-
-    let cursor = 0;
-    let allKeys: TelemetryData[] = [];
-
-    do {
-      // Fetch a batch of keys using SSCAN
-      const [newCursor, batch] = await kv.sscan(
-        'telemetryv2:all-keys',
-        cursor,
-        { count: 10000 } // Adjust COUNT based on your data size
-      );
-      
-      // Add the batch to the accumulated keys
-      allKeys = [...allKeys, ...(batch as unknown as TelemetryData[])];
-      
-      // Update the cursor for the next iteration
-      cursor = parseInt(newCursor);
-    } while (cursor !== 0);
-    
-    // Sort keys in descending order (newest first)
-    allKeys = allKeys.sort().reverse();
-
-  return allKeys;
-}
-
-/**
- * Retrieves telemetry data with pagination and filtering options
- */
-export async function getTelemetryData({
-  startDate,
-  endDate,
-  placeId,
-  gameId
-}: {
-  startDate?: number;
-  endDate?: number;
-  placeId?: number;
-  gameId?: number;
-} = {}): Promise<{
-  data: TelemetryData[];
-  totalCount: number;
-}> {
-  try {
-
-    let allKeys: TelemetryData[] = [];
-
-    // Get all keys from the set
-    // Sort keys in descending order (newest first)
-    allKeys = await pullTelemetryData();
-    
-    // Filter keys if needed
-    if (startDate || endDate || placeId || gameId) {
-      const filteredKeys: TelemetryData[] = [];
-      
-      for (const data of allKeys) {
-        // No need to JSON.parse - KV already returns the deserialized object
-        let includeItem = true;
-        
-        if (startDate && data.timestamp < startDate) includeItem = false;
-        if (endDate && data.timestamp > endDate) includeItem = false;
-        if (placeId !== undefined && data.placeid !== placeId) includeItem = false;
-        if (gameId !== undefined && data.gameid !== gameId) includeItem = false;
-        
-        if (includeItem) {
-          filteredKeys.push(data);
-        }
-      }
-      
-      allKeys = filteredKeys;
-    }
-    
-    // Filter out any null values (in case keys expired)
-    const validData = allKeys.filter((item): item is TelemetryData => item !== null);
-    
-    return {
-      data: validData,
-      totalCount: validData.length
-    };
-  } catch (err) {
-    console.error("Failed to retrieve telemetry data:", err);
-    throw new Error("Failed to retrieve telemetry data");
-  }
-}
-
-/**
- * Gets telemetry statistics
- */
-export async function getTelemetryStats(): Promise<{
-  totalCount: number;
-  uniquePlaceIds: number;
-  uniqueGameIds: number;
-  uniqueExecutors: number;
-  mostRecentTimestamp: number | null;
-}> {
-  try {
-    // Get all keys and fetch data
-    const telemetryData = await pullTelemetryData();
-    
-    if (telemetryData.length === 0) {
-      return {
-        totalCount: 0,
-        uniquePlaceIds: 0,
-        uniqueGameIds: 0,
-        uniqueExecutors: 0,
-        mostRecentTimestamp: null
-      };
-    }
-    
-    const validData = telemetryData.filter((item): item is TelemetryData => item !== null);
-    
-    const placeIds = new Set(validData.map(item => item.placeid));
-    const executors = new Set(validData.map(item => item.exec));
-    const gameIds = new Set(validData.map(item => item.gameid));
     const timestamps = validData.map(item => item.timestamp);
     
     return {
