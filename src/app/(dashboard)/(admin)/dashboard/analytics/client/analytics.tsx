@@ -1365,13 +1365,14 @@ export function AnalyticsClient() {
                             <TableHead>Executor</TableHead>
                             <TableHead>Game</TableHead>
                             <TableHead>Timestamp</TableHead>
+                            <TableHead>Failed</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {paginatedRawData.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell className="font-medium">
-                                {item.exec}
+                                {item.exec} ({item.execver ?? "0.0.0.0"})
                               </TableCell>
                               <TableCell>
                                 <GameInfoComponent
@@ -1381,6 +1382,9 @@ export function AnalyticsClient() {
                               </TableCell>
                               <TableCell>
                                 {new Date(item.timestamp).toLocaleString()}
+                              </TableCell>
+                              <TableCell>
+                                {item.failed == true ? "❌" : "✔️"} — {item.loading == true ? "Game" : "Loader"}
                               </TableCell>
                             </TableRow>
                           ))}

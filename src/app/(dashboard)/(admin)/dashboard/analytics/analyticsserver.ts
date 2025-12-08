@@ -4,9 +4,12 @@ import { kv } from "@vercel/kv";
 
 export type TelemetryData = {
   exec: string;
+  execver: string;
   placeid: number;
   gameid: number;
   timestamp: number;
+  loading: boolean;
+  failed: boolean;
 };
 
 /**
