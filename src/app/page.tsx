@@ -285,6 +285,14 @@ export default async function Home() {
               />
 
               <GameCard
+                title={"The Forge"}
+                mappingName={"The Forge - The Forge"}
+                image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsA6hCEJWHsIMkyhwi9DKxlYHUEu513Bce0vmRr`}
+                placeId={76558904092080}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
                 title={"Forsaken"}
                 mappingName={"Forsaken - Forsaken"}
                 image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsABgYQjlAKU9TJFX7q3z8ExZVAWyQeLOfamDgu`}
@@ -342,7 +350,9 @@ export default async function Home() {
 
               <GameCard
                 title={"Build A Boat For Treasure"}
-                mappingName={"Build A Boat For Treasure - Build A Boat For Treasure"}
+                mappingName={
+                  "Build A Boat For Treasure - Build A Boat For Treasure"
+                }
                 image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs98wtNJodlyrJ6uEv40SUmQtNBXAzhP87IaKM`}
                 placeId={537413528}
                 gamesStatusData={gamesStatusData}
@@ -350,7 +360,7 @@ export default async function Home() {
 
               <GameCard
                 title={"Grace"}
-               mappingName={"Grace - Grace"}
+                mappingName={"Grace - Grace"}
                 image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs57LO68MxTny6kRILmGKFZcwpAtJ8zEgP1fNh`}
                 placeId={138837502355157}
                 gamesStatusData={gamesStatusData}
@@ -382,7 +392,9 @@ export default async function Home() {
 
               <GameCard
                 title={"Bubble Gum Simulator Infinity"}
-                mappingName={"Bubble Gum Simulator Infinity - Bubble Gum Simulator Infinity"}
+                mappingName={
+                  "Bubble Gum Simulator Infinity - Bubble Gum Simulator Infinity"
+                }
                 image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsKDiSPErg4CbGHLXhvIFxQV5pY6qirBw2Ju7n`}
                 placeId={85896571713843}
                 gamesStatusData={gamesStatusData}

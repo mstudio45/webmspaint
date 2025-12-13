@@ -14,4 +14,5 @@ export const gamesList = [
   "Grow A Garden",
   "Forsaken",
   "99 Nights In The Forest",
+  "The Forge",
 ];
