@@ -144,7 +144,7 @@ export const MenuMapping = {
   }),
 
   ...SetupGameMapping("Murder Mystery 2", {
-    Game: "Murder Mystery 2 [BETA]",
+    Game: "Murder Mystery 2",
     DataURL: GetUIDataURL("mm2"),
   }),
 
@@ -166,7 +166,7 @@ export const MenuMapping = {
   }),
 
   ...SetupGameMapping("Bubble Gum Simulator Infinity", {
-    Game: "Bubble Gum Simulator Infinity [BETA]",
+    Game: "Bubble Gum Simulator Infinity [DISCONTINUED]",
     DataURL: GetUIDataURL("bgsi"),
   }),
 
@@ -176,7 +176,7 @@ export const MenuMapping = {
   }),
 
   ...SetupGameMapping("Grow A Garden", {
-    Game: "Grow A Garden [BETA]",
+    Game: "Grow A Garden",
     DataURL: GetUIDataURL("gag"),
   }),
 

@@ -24,7 +24,7 @@ import {
 
 import { LatestBuild, MenuMapping } from "@/data/features";
 
-import { useResetUIState } from "./obsidian/UIStateProvider";
+import { useResetUIState, useUIState } from "./obsidian/UIStateProvider";
 
 export function GameSelection({
   onValueChange,
@@ -127,10 +127,9 @@ export function GameSelection({
 }
 
 export function Features() {
-  const [game, setGame] = React.useState("DOORS - The Hotel");
-  const [footerGame, setFooterGame] = React.useState("DOORS");
   const [uiData, setUIData] = React.useState(undefined);
 
+  const { game, setGame, footerGame, setFooterGame } = useUIState();
   const refresh = useResetUIState();
 
   const memoizedObsidian = React.useMemo(() => {
@@ -151,7 +150,7 @@ export function Features() {
     )[1] as keyof (typeof MenuMapping)[typeof category];
     const gameData = MenuMapping[category][gameName];
 
-    setGame((g) => g);
+    // setGame((g) => g);
 
     const dataURL = (gameData as { DataURL: string }).DataURL;
     if (!dataURL) return;

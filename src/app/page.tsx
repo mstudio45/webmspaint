@@ -241,140 +241,155 @@ export default async function Home() {
           />
         </div>
 
-        <div
-          id="games"
-          className="flex flex-col items-center mt-[-15vh] mb-[10vh] text-center overflow-hidden relative"
-        >
-          <WordFadeIn
-            className="text-3xl md:text-3xl"
-            words={`mspaint officially supports ${
-              Object.keys(gamesList).length
-            } games`}
-            inView
-          />
-          <BlurFade className="mb-[15px]" delay={0.2 + 1 * 0.05} inView>
-            <WordFadeIn
-              className="text-xl md:text-xl font-normal"
-              words={`quality & quantity`}
-              inView
-              initialDelay={0.15 * 6}
-              delay={0.35}
-            />
-          </BlurFade>
-
-          <BlurFade
-            className="flex flex-row items-center justify-center mt-5 gap-3 max-md:flex-col flex-wrap px-10"
-            delay={0.2 + 2 * 0.05}
-            inView
-          >
-            <GameCard
-              title={"DOORS"}
-              id={6516141723}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsJ2hyPErBlZ5kfsQT24O8oeiR73u9rdc6zgm1`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Dead Rails"}
-              id={116495829188952}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs9AEEhFodlyrJ6uEv40SUmQtNBXAzhP87IaKM`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Forsaken"}
-              id={18687417158}
-              image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsABgYQjlAKU9TJFX7q3z8ExZVAWyQeLOfamDgu`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"99 Nights In The Forest"}
-              id={79546208627805}
-              image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsADE6fvhZdFkZ8BrWt7UD6Chu0vipAY5EmbNLK`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Fisch"}
-              id={16732694052}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsncwz3g7ulbhtMx156dQV3GozKUs08gOmX9jv`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Grow A Garden"}
-              id={126884695634066}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsHV5ApBayj1tLCfgrzV73ZonhEDeNGAiRdxQ0`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Bubble Gum Simulator Infinity"}
-              id={85896571713843}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsKDiSPErg4CbGHLXhvIFxQV5pY6qirBw2Ju7n`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Pressure"}
-              id={12411473842}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsH0LmZ6Layj1tLCfgrzV73ZonhEDeNGAiRdxQ`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"3008"}
-              id={2768379856}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsw0tQCS53yIYB4kajObRWsGN6r8uJDg2QVmKc`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Rooms & Doors"}
-              id={5865058321}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsbnS21bRQaNIsxXOcZmM8nAt4WkiC0HGreJvP`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Build A Boat For Treasure"}
-              id={537413528}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs98wtNJodlyrJ6uEv40SUmQtNBXAzhP87IaKM`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Grace"}
-              id={138837502355157}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs57LO68MxTny6kRILmGKFZcwpAtJ8zEgP1fNh`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Murder Mystery 2"}
-              id={142823291}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsBsdLSiOKJxivCc6LDnOGta3RYUHkWNMdS51o`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Word Bomb"}
-              id={2653064683}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsJ2uVLQbBlZ5kfsQT24O8oeiR73u9rdc6zgm1`}
-              gamesStatusData={gamesStatusData}
-            />
-
-            <GameCard
-              title={"Notoriety"}
-              id={21532277}
-              image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAskzKaZ1yN8Yh20HbLkz1KupR6QJWqIBGA9FOj`}
-              gamesStatusData={gamesStatusData}
-            />
-          </BlurFade>
-        </div>
-
         <UIStateProvider>
+          <div
+            id="games"
+            className="flex flex-col items-center mt-[-15vh] mb-[10vh] text-center overflow-hidden relative"
+          >
+            <WordFadeIn
+              className="text-3xl md:text-3xl"
+              words={`mspaint officially supports ${
+                Object.keys(gamesList).length
+              } games`}
+              inView
+            />
+            <BlurFade className="mb-[15px]" delay={0.2 + 1 * 0.05} inView>
+              <WordFadeIn
+                className="text-xl md:text-xl font-normal"
+                words={`quality & quantity`}
+                inView
+                initialDelay={0.15 * 6}
+                delay={0.35}
+              />
+            </BlurFade>
+
+            <BlurFade
+              className="flex flex-row items-center justify-center mt-5 gap-3 max-md:flex-col flex-wrap px-10"
+              delay={0.2 + 2 * 0.05}
+              inView
+            >
+              <GameCard
+                title={"DOORS"}
+                mappingName={"DOORS - The Hotel"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsJ2hyPErBlZ5kfsQT24O8oeiR73u9rdc6zgm1`}
+                placeId={6516141723}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Fisch"}
+                mappingName={"Fisch - Fisch"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsncwz3g7ulbhtMx156dQV3GozKUs08gOmX9jv`}
+                placeId={16732694052}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Forsaken"}
+                mappingName={"Forsaken - Forsaken"}
+                image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsABgYQjlAKU9TJFX7q3z8ExZVAWyQeLOfamDgu`}
+                placeId={18687417158}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"99 Nights In The Forest"}
+                mappingName={"DOORS - The Hotel"}
+                image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsADE6fvhZdFkZ8BrWt7UD6Chu0vipAY5EmbNLK`}
+                placeId={79546208627805}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Grow A Garden"}
+                mappingName={"Grow A Garden - Grow A Garden"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsHV5ApBayj1tLCfgrzV73ZonhEDeNGAiRdxQ0`}
+                placeId={126884695634066}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Pressure"}
+                mappingName={"Pressure - Pressure"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsH0LmZ6Layj1tLCfgrzV73ZonhEDeNGAiRdxQ`}
+                placeId={12411473842}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"3008"}
+                mappingName={"3008 - 3008"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsw0tQCS53yIYB4kajObRWsGN6r8uJDg2QVmKc`}
+                placeId={2768379856}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Dead Rails"}
+                mappingName={"Dead Rails - Dead Rails"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs9AEEhFodlyrJ6uEv40SUmQtNBXAzhP87IaKM`}
+                placeId={116495829188952}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Rooms & Doors"}
+                mappingName={"R&D - R&D"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsbnS21bRQaNIsxXOcZmM8nAt4WkiC0HGreJvP`}
+                placeId={5865058321}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Build A Boat For Treasure"}
+                mappingName={"Build A Boat For Treasure - Build A Boat For Treasure"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs98wtNJodlyrJ6uEv40SUmQtNBXAzhP87IaKM`}
+                placeId={537413528}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Grace"}
+               mappingName={"Grace - Grace"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs57LO68MxTny6kRILmGKFZcwpAtJ8zEgP1fNh`}
+                placeId={138837502355157}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Murder Mystery 2"}
+                mappingName={"Murder Mystery 2 - Murder Mystery 2"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsBsdLSiOKJxivCc6LDnOGta3RYUHkWNMdS51o`}
+                placeId={142823291}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Word Bomb"}
+                mappingName={"Word Bomb - Word Bomb"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsJ2uVLQbBlZ5kfsQT24O8oeiR73u9rdc6zgm1`}
+                placeId={2653064683}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Notoriety"}
+                mappingName={"Notoriety - Notoriety"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAskzKaZ1yN8Yh20HbLkz1KupR6QJWqIBGA9FOj`}
+                placeId={21532277}
+                gamesStatusData={gamesStatusData}
+              />
+
+              <GameCard
+                title={"Bubble Gum Simulator Infinity"}
+                mappingName={"Bubble Gum Simulator Infinity - Bubble Gum Simulator Infinity"}
+                image={`https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsKDiSPErg4CbGHLXhvIFxQV5pY6qirBw2Ju7n`}
+                placeId={85896571713843}
+                gamesStatusData={gamesStatusData}
+              />
+            </BlurFade>
+          </div>
+
           <Features />
         </UIStateProvider>
 
