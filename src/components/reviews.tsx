@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   QueryClient,
   QueryClientProvider,
-  useSuspenseQuery,
+  useQuery,
 } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
@@ -23,44 +23,46 @@ const ReviewCard = ({
   username,
   body,
   stars,
-}: {
-  img: string;
-  name: string;
-  username: string;
-  body: string;
-  stars: number;
-}) => {
-  return (
-    <figure
-      className={cn(
-        "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-        // light styles
-        "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-        // dark styles
-        "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
-        "max-h-[170px] transition-all duration-300"
-      )}
-    >
-      <div className="flex flex-row items-center gap-2">
-        <img
-          className="rounded-full"
-          width="32"
-          height="32"
-          alt=""
-          src={img}
-          loading="lazy"
-        />
-        <div className="flex flex-col">
-          <figcaption className="text-sm font-medium dark:text-white">
-            {name}
-          </figcaption>
-          <p className="text-xs font-medium dark:text-white/40">{username}</p>
-          <p className="flex absolute right-5 text-sm">{stars.toString()}/5</p>
+}: Review) => {
+  const memoized = useMemo(
+    () => (
+      <figure
+        className={cn(
+          "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
+          // light styles
+          "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
+          // dark styles
+          "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
+          "max-h-[170px] transition-all duration-300"
+        )}
+      >
+        <div className="flex flex-row items-center gap-2">
+          {// eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="rounded-full"
+            width="32"
+            height="32"
+            alt=""
+            src={img}
+            loading="lazy"
+          />}
+
+          <div className="flex flex-col">
+            <figcaption className="text-sm font-medium dark:text-white">
+              {name}
+            </figcaption>
+            <p className="text-xs font-medium dark:text-white/40">{username}</p>
+            <p className="flex absolute right-5 text-sm">{stars.toString()}/5</p>
+          </div>
         </div>
-      </div>
-      <blockquote className="mt-2 text-sm text-ellipsis">{body}</blockquote>
-    </figure>
+
+        <blockquote className="mt-2 text-sm text-ellipsis">{body}</blockquote>
+      </figure>
+    ),
+    [img, name, username, body, stars]
   );
+
+  return memoized;
 };
 
 type ReviewsResponse = {
@@ -69,7 +71,6 @@ type ReviewsResponse = {
 };
 
 const reviewsQueryKey = ["reviews"] as const;
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -99,12 +100,13 @@ async function fetchReviews(): Promise<ReviewsResponse> {
 }
 
 function ReviewMarqueeContent() {
-  const { data } = useSuspenseQuery({
+  const { data } = useQuery({
     queryKey: reviewsQueryKey,
     queryFn: fetchReviews,
   });
 
-  const { reviews, average } = data;
+  const reviews = useMemo(() => data?.reviews ?? [], [data?.reviews]);
+  const average = useMemo(() => data?.average ?? 0, [data?.average]);
 
   const [firstRow, secondRow] = useMemo(() => {
     const mid = Math.floor(reviews.length / 2);
@@ -133,12 +135,10 @@ function ReviewMarqueeContent() {
     [secondRow]
   );
 
-  const averageScore = Number.isFinite(average) ? average : 0;
-
   return (
     <>
       <p className="text-muted-foreground text-sm">
-        Average mspaint rating: {averageScore.toFixed(2)} ⭐
+        Average mspaint rating: {Number.isFinite(average) ? average.toFixed(2) : "-"} ⭐
       </p>
 
       <div className="relative py-10 flex w-screen flex-col items-center justify-center overflow-hidden bg-background md:shadow-xl text-left">
@@ -152,6 +152,10 @@ function ReviewMarqueeContent() {
 }
 
 export default function ReviewMarquee() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
   return (
     <QueryClientProvider client={queryClient}>
       <ReviewMarqueeContent />

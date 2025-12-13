@@ -71,6 +71,7 @@ export default function GameCard({
           alt={title}
           width={0} height={0} sizes={"100vw"}
           className="w-full h-full object-cover cursor-pointer"
+          loading="lazy"
           onClick={(e) => {
             e.preventDefault();
             uiState.setGame(mappingName);

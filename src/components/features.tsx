@@ -23,16 +23,16 @@ import {
 } from "@/components/ui/popover";
 
 import { LatestBuild, MenuMapping } from "@/data/features";
-
 import { useResetUIState, useUIState } from "./obsidian/UIStateProvider";
 
 export function GameSelection({
-  onValueChange,
+  value,
+  setValue
 }: {
-  onValueChange: (value: string) => void;
+  value: string;
+  setValue: (value: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("DOORS - The Hotel");
 
   const [search, setSearch] = React.useState("");
   const filteredGroups = React.useMemo(() => {
@@ -106,7 +106,6 @@ export function GameSelection({
                       onSelect={() => {
                         const fullValue = `${category} - ${gameKey}`;
                         setValue(fullValue);
-                        onValueChange(fullValue);
                         setOpen(false);
                         setSearch("");
                       }}
@@ -150,8 +149,6 @@ export function Features() {
     )[1] as keyof (typeof MenuMapping)[typeof category];
     const gameData = MenuMapping[category][gameName];
 
-    // setGame((g) => g);
-
     const dataURL = (gameData as { DataURL: string }).DataURL;
     if (!dataURL) return;
 
@@ -162,7 +159,7 @@ export function Features() {
         setFooterGame((gameData as { Game: string }).Game);
         refresh();
       });
-  }, [game, refresh]);
+  }, [game, refresh, setFooterGame]);
 
   return (
     <div
@@ -181,28 +178,8 @@ export function Features() {
         </div>
 
         <GameSelection
-          onValueChange={(game) => {
-            const category = game.split(" - ")[0] as keyof typeof MenuMapping;
-            const gameName = game.split(" - ")[1];
-            const gameData =
-              MenuMapping[category][
-                gameName as keyof (typeof MenuMapping)[typeof category]
-              ];
-
-            setGame(game);
-
-            const dataURL = (gameData as { DataURL: string }).DataURL;
-            if (!dataURL) return;
-
-            fetch(dataURL)
-              .then((res) => res.json())
-              .then((data) => {
-                setUIData(data);
-                // @ts-expect-error erm
-                setFooterGame(gameData.Game);
-                refresh();
-              });
-          }}
+          value={game}
+          setValue={setGame}
         />
       </BlurFade>
     </div>
