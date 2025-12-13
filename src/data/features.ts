@@ -96,6 +96,11 @@ export const MenuMapping = {
     DataURL: GetUIDataURL("fisch"),
   }),
 
+  ...SetupGameMapping("The Forge", {
+    Game: "The Forge",
+    DataURL: GetUIDataURL("theforge"),
+  }),
+
   ...SetupGameMapping("R&D", {
     Game: "R&D",
     DataURL: GetUIDataURL("R&D"),
