@@ -29,18 +29,19 @@ export default function Page() {
           <BlurFade delay={0.2 + 1 * 0.05} inView>
             <Card>
               <CardHeader>
-                <CardTitle className="max-md:text-center">
-                  mspaint Key System
+                <CardTitle className="flex items-center max-md:text-center">
+                  <span className="self-center">Key System</span>
                 </CardTitle>
               </CardHeader>
-              <CardFooter className="flex px-5 gap-2 max-md:flex-col max-md:px-10">
+
+              <CardFooter className="flex px-5 gap-2 mb-[-5px] max-md:flex-col max-md:px-10">
                 <Link
                   href={
                     "https://ads.luarmor.net/get_key?for=mspaint_key_linkvertise-CwcwpnwnQoLj"
                   }
                   className="max-md:w-full"
                 >
-                  <Button className="max-md:w-full">
+                  <Button className="cursor-pointer max-md:w-full">
                     Linkvertise{" "}
                     <Image
                       className="ml-2"
@@ -58,7 +59,7 @@ export default function Page() {
                   }
                   className="max-md:w-full"
                 >
-                  <Button className="max-md:w-full">
+                  <Button className="cursor-pointer max-md:w-full">
                     work.ink{" "}
                     <Image
                       className="ml-2"
@@ -69,23 +70,13 @@ export default function Page() {
                     />
                   </Button>
                 </Link>
-
-                <Link href={""} className="max-md:w-full">
-                  <Button
-                    className="text-muted-foreground cursor-not-allowed"
-                    variant={"outline"}
-                  >
-                    Lootlabs (DISABLED){" "}
-                    <Image
-                      className="ml-2"
-                      src="/icons/lootlabs.png"
-                      width={25}
-                      height={25}
-                      alt="Lootlabs"
-                    />
-                  </Button>
-                </Link>
               </CardFooter>
+
+              <div className="text-center text-sm text-muted-foreground mb-3">
+                <Link href={"https://docs.mspaint.cc/key-system"} className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white">User Guide</Link>
+                <Link href={"https://mspaint.cc"} className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white ml-4">Go Home</Link>
+              </div>
+
             </Card>
           </BlurFade>
         </div>

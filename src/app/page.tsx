@@ -93,10 +93,19 @@ export default async function Home() {
         <NavbarContent justify="end" className="mt-4 mb-4">
           <NavbarItem>
             <Link
+              href="/key"
+              className="relative text-foreground transition-colors hover:text-neutral-200 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+            >
+              Key System
+            </Link>
+          </NavbarItem>
+
+          <NavbarItem>
+            <Link
               href="https://shop.mspaint.cc/"
               className="relative text-foreground transition-colors hover:text-neutral-200 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full"
             >
-              Shop
+              Our Shop
             </Link>
           </NavbarItem>
 
@@ -568,7 +577,13 @@ export default async function Home() {
                   href={"https://shop.mspaint.cc/"}
                 >
                   shop
-                </Link>
+                </Link> or buy going through the{" "}
+                <Link
+                  className="text-white-500 underline"
+                  href={"/key"}
+                >
+                  key system
+                </Link>.
               </AccordionContent>
             </AccordionItem>
 
