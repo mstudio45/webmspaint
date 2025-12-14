@@ -74,7 +74,6 @@ export default function Page() {
 
               <div className="text-center text-sm text-muted-foreground mb-3">
                 <Link href={"https://docs.mspaint.cc/key-system"} className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white">User Guide</Link>
-                <Link href={"https://mspaint.cc"} className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white ml-4">Go Home</Link>
               </div>
 
             </Card>
