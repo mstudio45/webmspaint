@@ -62,7 +62,7 @@ export function TimeUpdater({ initialTimeLeft, freezeAfterTimeout = false, class
   }
 
   return (
-    <span className={cn(className, timeLeftColor)}>
+    <span className={cn(className, "text-base", timeLeftColor)}>
       {timeLeftText}
     </span>
   );

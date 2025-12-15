@@ -133,6 +133,7 @@ export default function MiniDashboardCard({
   const isMember = subscription != null;
   const isLifetime = expirationDate == -1;
   const isExpired = !isLifetime && expirationDate - Date.now() <= 0;
+  const isKeySystemMember = subscription?.from_key_system === true;
 
   const isUnlink = userStatus === "unlink";
   const isResetState = userStatus === "reset";
@@ -222,19 +223,26 @@ export default function MiniDashboardCard({
                         ) : !isExpired ? (
                           <div className="flex items-center justify-between w-full -mb-2">
                             {isLifetime ? (
-                              <p className="text-base text-green-400 mt-2">
+                              <p className="text-base text-green-400">
                                 Lifetime access ★
                               </p>
                             ) : (
-                              <TimeUpdater
-                                initialTimeLeft={timeLeftMs}
-                                freezeAfterTimeout={true}
-                              />
+                              <div className={cn("flex flex-col gap-1", isKeySystemMember ? "mt-2" : "")}>
+                                {isKeySystemMember && (
+                                  <p className="text-base text-orange-400">
+                                    Key From Key System
+                                  </p>
+                                )}
+                                <TimeUpdater
+                                  initialTimeLeft={timeLeftMs}
+                                  freezeAfterTimeout={true}
+                                />
+                              </div>
                             )}
 
                             <Button
                               variant={"outline"}
-                              className="w-20 h-8 p-0 text-xs font-bold flex items-center justify-left"
+                              className={cn("w-20 h-8 p-0 text-xs font-bold flex items-center justify-left", isKeySystemMember ? "mt-2" : "")}
                               onClick={() => setGetScriptDialog(true)}
                             >
                               Get Script
@@ -530,7 +538,7 @@ export default function MiniDashboardCard({
                                 className="w-full"
                                 onClick={() => setRedeemDialog(true)}
                               >
-                                {isExpired ? "Buy" : "Extend"} Subscription
+                                {isKeySystemMember ? "Buy Premium Key" : ((isExpired ? "Buy" : "Extend") + " Subscription")}
                               </RainbowButton>
 
                               <Dialog

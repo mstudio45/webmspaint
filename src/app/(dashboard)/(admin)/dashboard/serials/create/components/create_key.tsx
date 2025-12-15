@@ -84,22 +84,24 @@ export default function CreateSerialKey() {
                 Woah so cool :content: with order id:{" "}
                 {order_id ?? "REPLACEMENT"}
               </AlertDialogDescription>
-
-              {new_key.map((key, index) => (
-                <div key={index} className="flex flex-row gap-2">
-                  <Input
-                    readOnly
-                    value={`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(
-                      key
-                    )}`}
-                  />
-                  <CopyButton
-                    text={`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(
-                      key
-                    )}`}
-                  />
-                </div>
-              ))}
+              
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-scroll">
+                {new_key.map((key, index) => (
+                  <div key={index} className="flex flex-row gap-2">
+                    <Input
+                      readOnly
+                      value={`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(
+                        key
+                      )}`}
+                    />
+                    <CopyButton
+                      text={`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(
+                        key
+                      )}`}
+                    />
+                  </div>
+                ))}
+              </div>
             </>
           ) : (
             <>

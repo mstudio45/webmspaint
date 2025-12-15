@@ -53,23 +53,12 @@ export async function GenerateSerial(
   durationMinutes: number | null = null
 ) {
   const allowed = await isUserAllowedOnDashboard();
-
-  if (!allowed) {
-    return {
-      status: 403,
-      error: "nah",
-    };
-  }
+  if (!allowed) return { status: 403, error: "nah" };
 
   let actualInvoiceId = invoiceID;
-
   if (typeof invoiceID === "string") {
-    if (actualInvoiceId?.trim() === "") {
-      actualInvoiceId = "REPLACEMENT";
-    }
-  } else if (invoiceID === null) {
-    actualInvoiceId = "REPLACEMENT";
-  } else if (invoiceID === undefined) {
+    if (actualInvoiceId?.trim() === "") actualInvoiceId = "REPLACEMENT";
+  } else if (invoiceID === null || invoiceID === undefined) {
     actualInvoiceId = "REPLACEMENT";
   }
 
@@ -107,14 +96,8 @@ export async function GenerateSerial(
 
 export async function DeleteSerial(serial: string) {
   const allowed = await isUserAllowedOnDashboard();
-
-  if (!allowed) {
-    return {
-      status: 403,
-      error: "nah",
-    };
-  }
-
+  if (!allowed) return { status: 403, error: "nah" };
+  
   const { rows } =
     await sql`SELECT * FROM mspaint_keys_new WHERE serial = ${serial}`;
 
@@ -176,13 +159,7 @@ export async function ModifySubscription(
 
 export async function GetAllSerialData() {
   const allowed = await isUserAllowedOnDashboard();
-
-  if (!allowed) {
-    return {
-      status: 403,
-      error: "nah",
-    };
-  }
+  if (!allowed) return { status: 403, error: "nah" };
 
   const { rows } = await sql`
     SELECT *
@@ -195,13 +172,7 @@ export async function GetAllSerialData() {
 
 export async function GetAllUserData() {
   const allowed = await isUserAllowedOnDashboard();
-
-  if (!allowed) {
-    return {
-      status: 403,
-      error: "nah",
-    };
-  }
+  if (!allowed) return { status: 403, error: "nah" };
 
   const { rows } = await sql`SELECT * FROM mspaint_users`;
   return rows;
@@ -226,7 +197,8 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
       banned: number;
       status: string;
     }[]
-  }) {
+  }
+) {
   const allowed = await isUserAllowedOnDashboard();
   if (!allowed && from_dashboard)
     return { status: 403, error: "Permission denied" };
@@ -249,7 +221,6 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
   }
   
   const user = data ? data.users[0] : override_data?.users[0];
-
   if (!user) {
     await sql`UPDATE mspaint_users
       SET user_status = 'unlink'
@@ -262,8 +233,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
   const expireTime = timestamp_expire == -1 ? -1 : new Date(timestamp_expire * 1000).getTime();
 
   try {
-
-    //Insert if lrm_serial and discord_id doesn't match any row, update if matches lrm_serial or discord_id
+    // Insert if lrm_serial and discord_id doesn't match any row, update if matches lrm_serial or discord_id
     let result = await sql`
       UPDATE mspaint_users
       SET 
@@ -271,15 +241,14 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         expires_at = ${expireTime},
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
-        last_sync = ${Date.now()}
+        last_sync = ${Date.now()},
+        from_key_system = ${Boolean(user.note === "Ad Reward")}
       WHERE lrm_serial = ${lrm_serial}
       RETURNING *;
     `;
-
-    if (result.rowCount || 0 > 0) {
-      return { status: 200, success: "User synced successfully (by Luarmor Key)" };
-    }
-
+    if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by Luarmor Key)" };
+    
+    // Sync by Discord ID
     result = await sql`
       UPDATE mspaint_users
       SET 
@@ -287,25 +256,25 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         expires_at = ${expireTime},
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
-        last_sync = ${Date.now()}
+        last_sync = ${Date.now()},
+        from_key_system = ${Boolean(user.note === "Ad Reward")}
       WHERE discord_id = ${user.discord_id}
       RETURNING *;
     `;
-
-    if (result.rowCount || 0 > 0) {
-      return { status: 200, success: "User synced successfully (by discord ID)" };
-    }
-
+    if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by discord ID)" };
+    
+    // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
-        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync
+        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system
       ) VALUES (
         ${lrm_serial},
         ${user.discord_id},
         ${expireTime},
         ${Boolean(user.banned)},
         ${user.status},
-        ${Date.now()}
+        ${Date.now()},
+        ${Boolean(user.note === "Ad Reward")}
       )
       RETURNING *;
     `;
@@ -318,8 +287,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
 
 export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_dashboard: boolean = true) {
   const allowed = await isUserAllowedOnDashboard();
-  if (!allowed && from_dashboard)
-    return { status: 403, error: "Permission denied" };
+  if (!allowed && from_dashboard) return { status: 403, error: "Permission denied" };
 
   const response = await RequestLuarmorUsersEndpoint(
     HTTP_METHOD.GET,
@@ -347,7 +315,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
   const timestamp_expire = parseInt(user.auth_expire, 10);
   const expireTime = timestamp_expire == -1 ? -1 : timestamp_expire * 1000;
   try {
-    //Insert if lrm_serial and discord_id doesn't match any row, update if matches lrm_serial or discord_id
+    // Insert if lrm_serial and discord_id doesn't match any row, update if matches lrm_serial or discord_id
     let result = await sql`
       UPDATE mspaint_users
       SET 
@@ -355,16 +323,14 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         expires_at = ${expireTime},
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
-        last_sync = ${Date.now()}
+        last_sync = ${Date.now()},
+        from_key_system = ${Boolean(user.note === "Ad Reward")}
       WHERE lrm_serial = ${user.user_key}
       RETURNING *;
     `;
+    if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by Luarmor Key)" };
 
-    // If update by serial succeeded
-    if (result.rowCount || 0 > 0) {
-      return { status: 200, success: "User synced successfully (by Luarmor Key)" };
-    }
-
+    // Sync by Discord ID
     result = await sql`
       UPDATE mspaint_users
       SET 
@@ -372,25 +338,25 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         expires_at = ${expireTime},
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
-        last_sync = ${Date.now()}
+        last_sync = ${Date.now()},
+        from_key_system = ${Boolean(user.note === "Ad Reward")}
       WHERE discord_id = ${discord_id}
       RETURNING *;
     `;
-
-    if (result.rowCount || 0 > 0) {
-      return { status: 200, success: "User synced successfully (by discord ID)" };
-    }
-
+    if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by discord ID)" };
+    
+    // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
-        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync
+        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system
       ) VALUES (
         ${user.user_key},
         ${discord_id},
         ${expireTime},
         ${Boolean(user.banned)},
         ${user.status},
-        ${Date.now()}
+        ${Date.now()},
+        ${Boolean(user.note === "Ad Reward")}
       )
       RETURNING *;
     `;
@@ -481,8 +447,7 @@ export async function SyncExpirationsFromLuarmor(
 
   // Bulk INSERT … ON CONFLICT … DO UPDATE
   if (filteredRows.length > 0) {
-    
-    //prepare unlink
+    // prepare unlink
     if (step == 1) await sql`UPDATE mspaint_users SET user_status = 'unlink';`;
     
     const queryUpsert = `
@@ -493,10 +458,11 @@ export async function SyncExpirationsFromLuarmor(
       updated_by_discord AS (
         UPDATE mspaint_users u
         SET
-          lrm_serial  = i.lrm_serial,
-          expires_at  = i.expires_at,
-          is_banned   = i.is_banned,
-          user_status = i.user_status
+          lrm_serial      = i.lrm_serial,
+          expires_at      = i.expires_at,
+          is_banned       = i.is_banned,
+          user_status     = i.user_status,
+          from_key_system = i.from_key_system
         FROM incoming i
         WHERE u.discord_id IS NOT DISTINCT FROM i.discord_id
           AND u.lrm_serial IS DISTINCT FROM i.lrm_serial
@@ -506,10 +472,11 @@ export async function SyncExpirationsFromLuarmor(
       updated_by_serial AS (
         UPDATE mspaint_users u
         SET
-          discord_id  = i.discord_id,
-          expires_at  = i.expires_at,
-          is_banned   = i.is_banned,
-          user_status = i.user_status
+          discord_id      = i.discord_id,
+          expires_at      = i.expires_at,
+          is_banned       = i.is_banned,
+          user_status     = i.user_status,
+          from_key_system = i.from_key_system
         FROM incoming i
         WHERE u.lrm_serial IS NOT DISTINCT FROM i.lrm_serial
           AND (u.discord_id IS DISTINCT FROM i.discord_id OR u.expires_at IS DISTINCT FROM i.expires_at
@@ -518,8 +485,8 @@ export async function SyncExpirationsFromLuarmor(
       ),
       -- 3) insert the remaining incoming rows that matched nothing
       inserted AS (
-        INSERT INTO mspaint_users (lrm_serial, discord_id, expires_at, is_banned, user_status)
-        SELECT i.lrm_serial, i.discord_id, i.expires_at, i.is_banned, i.user_status
+        INSERT INTO mspaint_users (lrm_serial, discord_id, expires_at, is_banned, user_status, from_key_system)
+        SELECT i.lrm_serial, i.discord_id, i.expires_at, i.is_banned, i.user_status, i.from_key_system
         FROM incoming i
         LEFT JOIN mspaint_users u
           ON u.lrm_serial IS NOT DISTINCT FROM i.lrm_serial

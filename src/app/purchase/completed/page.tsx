@@ -109,7 +109,6 @@ export default async function Page(props: {
   // show claim stuff
   if (serials.length === 1) {
     const serial = serials[0];
-
     let { rows } = await sql`SELECT * FROM mspaint_keys_new WHERE serial = ${serial}`;
 
     if (rows.length === 0) {
@@ -142,7 +141,6 @@ export default async function Page(props: {
     }
 
     if (rows[0].claimed_at) {
-
       ({ rows } = await sql`
         SELECT *
         FROM public.mspaint_keys_new AS k

@@ -167,6 +167,7 @@ export async function RedeemKey(serial: string, user_id: string) {
     const createSubscriptionTime = validFor
       ? claimedAtUnixtimestamp + parseIntervalToSec(validFor)
       : lifetimeDate;
+      
     const response = await RequestLuarmorUsersEndpoint(HTTP_METHOD.POST, "", {
       discord_id: user_id,
       note: (serialKeyData.order_id ?? "Generic ID") + " - " + serial,

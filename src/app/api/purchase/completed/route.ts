@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
 
     if (hash === signature) {
         const data = JSON.parse(payload);
-        
         const createdSerials = [];
 
         const keyItem = data.listing.slug;
@@ -54,19 +53,19 @@ export async function POST(request: NextRequest) {
         switch (keyItem) {
             case "mspaint-30-days-key":
                 durationMinutes = 31 * 24 * 60; // 30 days in minutes
-            break;
+                break;
 
             case "mspaint-lifetime-key":
-                durationMinutes = null; //lifetime :steamhappy:
-            break;
+                durationMinutes = null; // lifetime :steamhappy:
+                break;
 
             default:
                 return new Response(
-                `An error occured while generating your key\n` +
-                `(Error: Invalid Slug)\n` +                
-                `Please contact please contact support (https://www.mspaint.cc/support)\n` +
-                `or join our discord server here: https://www.mspaint.cc/discord/`
-            ); 
+                    `An error occured while generating your key\n` +
+                    `(Error: Invalid Slug)\n` +                
+                    `Please contact please contact support (https://www.mspaint.cc/support)\n` +
+                    `or join our discord server here: https://www.mspaint.cc/discord/`
+                );
         }
 
         const validFor = createInterval(durationMinutes);
@@ -80,8 +79,9 @@ export async function POST(request: NextRequest) {
 
         return new Response(
             `Thank you for purchasing ${data.quantity} mspaint key(s)!\n` +
-            `You can redeem your serial(s) at: https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(createdSerials.join(","))}\n\n` +
-            `Make sure to keep this link safe, as it is the only way to redeem your key(s).`
+            `If you have any issue, please contact us at https://www.mspaint.cc/support .\n` +
+            `Make sure to keep this link safe, as it is the only way to redeem your key(s). You can redeem your serial(s) at:\n\n` +
+            `https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(createdSerials.join(","))}`
         );
         
         /*const serialsFormatted = createdSerials
@@ -158,18 +158,16 @@ export async function GET(request: NextRequest) {
         claimed_at    TIMESTAMPTZ NULL,
         key_duration  TEXT       NULL,
         linked_to     TEXT       NULL
-        );    
-    `;
+    );`;
     
     const { rows } = await sql`SELECT * FROM mspaint_keys_new WHERE order_id = ${order_id};`
 
     let claimedCount = 0;
     for (const row of rows) {
-        if (row.claimed_at) { claimedCount++; }
+        if (row.claimed_at) claimedCount++;
     }
 
     const isAllClaimed = (claimedCount === deliverables.data[0].quantity);
-
     if (rows.length > 0 && !isAllClaimed) {
         return redirect("/purchase/completed?serial=" + encodeURIComponent(rows.map(row => row.serial).join(",")));
     }

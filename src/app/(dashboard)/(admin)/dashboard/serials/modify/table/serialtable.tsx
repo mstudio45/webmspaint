@@ -72,14 +72,20 @@ export type SerialDef = {
   discord_id?: string;
   lrm_serial?: string;
   expires_at: number | null;
+  from_key_system?: boolean;
 };
 
 const claimedAtFilter: FilterFn<SerialDef> = (row, columnId, filterValue) => {
+  if (typeof filterValue !== 'string') return true;
+
+  const filter = filterValue.toLowerCase();
+  if (filter.includes("key") && row.original?.from_key_system === true) return true
+
   const value = row.getValue<boolean>(columnId);
   const label = value ? "claimed" : "unclaimed";
 
-  if (typeof filterValue !== 'string') return true;
-  return label.includes(filterValue.toLowerCase());
+  if (label == "unclaimed") return filter.startsWith("u") && label.includes(filter);
+  return label.includes(filter);
 };
 
 export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
@@ -93,6 +99,9 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
   const [time, setTime] = React.useState(Date.now());
   const [syncingRows, setSyncingRows] = React.useState<Set<string>>(new Set());
   const [sortOrder, setSortOrder] = React.useState<'oldest' | 'newest'>('oldest');
+  const [clientLocale, setClientLocale] = React.useState("en-US");
+
+  React.useEffect(() => setClientLocale(navigator?.language ?? "en-US"), [])
   
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'oldest' ? 'newest' : 'oldest');
@@ -126,43 +135,94 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
       header: () => <p className="flex ml-4">Status</p>,
       cell: ({ row }) => {
         const claimedAt = row.getValue("claimed_at");
+        const fromKeySystem = row.original?.from_key_system === true;
+
         return (
-          <div className="ml-1">
+          <div className={cn("ml-1", fromKeySystem ? "w-[100px]" : "w-[150px]")}>
             <Badge
-              variant={claimedAt ? "outline" : "default"}
+              className={cn("justify-center", fromKeySystem ? "w-[84px]" : "w-[150px]")}
+              variant={fromKeySystem ? "secondary" : (claimedAt ? "outline" : "default")}
             >
-              {claimedAt ? "Claimed" : "Unclaimed"}
+              {fromKeySystem ? "Key System" : (claimedAt ? (new Date(claimedAt.toString()).toLocaleString(clientLocale)) : "Unclaimed")}
             </Badge>
           </div>
         );
       },
       filterFn: claimedAtFilter
     },
+
     {
       accessorKey: "order_id",
       header: "Order ID",
+      cell: ({ row }) => {
+        const order_id = String(row.getValue("order_id") || "");
+
+        if (order_id.includes("REPLACEMENT")) {
+          return (
+             <div className="flex flex-col w-[110px]">
+              <Badge className="justify-center" variant={"secondary"}>{order_id}</Badge>
+            </div>
+          );
+        } else if (order_id.toLowerCase().includes("test")) {
+          return (
+             <div className="flex flex-col w-[110px]">
+              <Badge className="justify-center" variant={"destructive"}>{order_id}</Badge>
+            </div>
+          );
+        } else if (order_id.toLowerCase().includes("translator")) {
+          return (
+             <div className="flex flex-col w-[110px]">
+              <Badge className="justify-center" variant={"default"}>{order_id}</Badge>
+            </div>
+          );
+        }
+
+        return order_id;
+      },
     },
     {
       accessorKey: "serial",
       header: "mspaint serial",
     },
+
     {
-      accessorKey: "key_duration",
-      header: "Key Duration",
+      accessorKey: "discord_id",
+      header: "Discord ID",
       cell: ({ row }) => {
-        const keyDuration: string | null = row.original.key_duration;
+        const discord_id = row.getValue("discord_id");
+
         return (
-          <div className="flex">
-            {!keyDuration ? (
-              <Badge variant={"outline"}>Lifetime</Badge>
-            ) : (
-              <span className="font-medium">{keyDuration}</span>
-            )}
-          </div>
+          <span className={cn(discord_id ? "" : "text-muted-foreground")}>
+            {discord_id ? String(discord_id) : "Not assigned yet"}
+          </span>
         );
       },
     },
 
+    {
+      accessorKey: "key_duration",
+      header: "Duration",
+      cell: ({ row }) => {
+        const keyDuration: string | null = row.original.key_duration;
+        const fromKeySystem = row.original?.from_key_system === true;
+
+        return (
+          <div className="flex w-[90px]">
+            {
+              fromKeySystem ? (
+                <Badge className="justify-center w-[84px]" variant={"secondary"}>Key System</Badge>
+              ) : (<>
+                {!keyDuration ? (
+                  <Badge className="justify-center w-[84px]" variant={"default"}>Lifetime</Badge>
+                ) : (
+                  <Badge className="justify-center w-[84px]" variant={"outline"}>{keyDuration}</Badge>
+                )}
+              </>)
+            }
+          </div>
+        );
+      },
+    },
     {
       accessorKey: "expires_at",
       header: "Expires At",
@@ -182,13 +242,18 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
         if (!lrmExpiresAt) {
           if ((lrm_serial?.length ?? 0) > 0) {
             return (
-              <div className="flex">
-                <Badge variant={"outline"}>Not Found/Syncronized</Badge>
+              <div className="flex flex-col w-[110px]">
+                <Badge className="justify-center" variant={"outline"}>Not Found</Badge>
               </div>
             );
           }
-          //If there's no luarmor serial and expires_at is null
-          return <span className={cn("text-muted-foreground")}>- -</span>;
+          
+          // If there's no luarmor serial and expires_at is null
+          return  (
+            <div className="flex flex-col w-[110px]">
+              <Badge className="justify-center text-muted-foreground" variant={"outline"}>---</Badge>
+            </div>
+          );
         }
 
         if (!lrmExpiresAt) {
@@ -199,8 +264,8 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
 
         if (lrmExpiresAt == -1) {
           return (
-            <div className="flex">
-              <Badge variant={"outline"}>Lifetime</Badge>
+            <div className="flex flex-col w-[110px]">
+              <Badge className="h-8 justify-center" variant={"outline"}>Lifetime</Badge>
             </div>
           );
         }
@@ -210,12 +275,13 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
           calculateTimeStringRemainingFormated(timeLeftMs);
 
         return (
-          <div className="flex flex-col">
-            <span className={cn("text-xs", timeLeftColor)}>{timeLeftText}</span>
+          <div className="flex flex-col w-[110px]">
+            <Badge variant={"outline"} className={cn("h-8 justify-center text-xs", timeLeftColor)}>{timeLeftText.replace(" remaining", "")}</Badge>
           </div>
         );
       },
     },
+
     {
       accessorKey: "lrm_serial",
       header: "LRM serial",
@@ -225,19 +291,6 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
         return (
           <span className={cn(lrm_serial ? "" : "text-muted-foreground")}>
             {lrm_serial ? String(lrm_serial) : "Not assigned yet"}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "discord_id",
-      header: "Discord ID",
-      cell: ({ row }) => {
-        const discord_id = row.getValue("discord_id");
-
-        return (
-          <span className={cn(discord_id ? "" : "text-muted-foreground")}>
-            {discord_id ? String(discord_id) : "Not assigned yet"}
           </span>
         );
       },
@@ -446,6 +499,7 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
       <div className="flex items-center flex-row py-4">
         <Input
           placeholder={`Filter by ${filterTarget}...`}

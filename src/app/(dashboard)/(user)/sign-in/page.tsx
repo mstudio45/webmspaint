@@ -13,11 +13,8 @@ import { redirect } from "next/navigation";
 
 export default async function SignInPage() {
   const session = await auth();
-
-  if (session && session.user) {
-    return redirect("/subscription-dashboard");
-  }
-
+  if (session && session.user) return redirect("/subscription-dashboard");
+  
   return (
     <div className="flex min-h-screen flex-col items-center justify-center black-500 p-4">
       <Card className="w-full max-w-md overflow-hidden shadow-xl">
@@ -47,7 +44,6 @@ export default async function SignInPage() {
             <form
               action={async () => {
                 "use server";
-
                 await signIn("discord");
               }}
             >
