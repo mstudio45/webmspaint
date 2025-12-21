@@ -35,7 +35,7 @@ export default function Page() {
               </CardHeader>
 
               <CardFooter className="flex px-5 gap-2 mb-[-5px] max-md:flex-col max-md:px-10">
-                <Link
+                {/*<Link
                   href={
                     "https://ads.luarmor.net/get_key?for=mspaint_key_linkvertise-CwcwpnwnQoLj"
                   }
@@ -51,7 +51,7 @@ export default function Page() {
                       alt="Linkvertise"
                     />
                   </Button>
-                </Link>
+                </Link>*/}
 
                 <Link
                   href={

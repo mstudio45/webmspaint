@@ -5,9 +5,11 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import {
+  BugOffIcon,
   LockKeyholeIcon,
   LockKeyholeOpenIcon,
   PackageIcon,
+  PackagePlusIcon,
 } from "lucide-react";
 import { RainbowButton } from "./magicui/rainbow-button";
 import { TimeUpdater } from "./time-updater";
@@ -466,6 +468,36 @@ export default function MiniDashboardCard({
                             </Sheet>
                           </div>
                         )}
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="outline"
+                            className="w-half flex items-center justify-center py-2 mt-2 cursor-pointer"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              router.push("/subscription-dashboard/bugreport")
+                            }}
+                          >
+                            <BugOffIcon />
+                            <span className="text-xs sm:text-sm">
+                              Bug Report
+                            </span>
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="w-half flex items-center justify-center py-2 mt-2 cursor-pointer"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              router.push("/subscription-dashboard/suggestion")
+                            }}
+                          >
+                            <PackagePlusIcon />
+                            <span className="text-xs sm:text-sm">
+                              Suggestion
+                            </span>
+                          </Button>
+                        </div>  
                       </>
                     ) : (
                       <div className="w-full grid grid-cols-2 gap-2 justify-center items-center mt-4">
@@ -491,7 +523,7 @@ export default function MiniDashboardCard({
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div className="*:mt-3">
                       {/* honestly, idc... */}
 
                       {(!isBanned) && (

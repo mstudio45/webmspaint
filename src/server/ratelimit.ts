@@ -43,6 +43,18 @@ export class RateLimitService {
       prefix: "ratelimit:redeemkey",
       limiter: Ratelimit.slidingWindow(10, "2m"),
     }, 2 * 60 * 1000); // 2 minutes in ms
+
+    this.createLimiter("bugreports", {
+      analytics: true,
+      prefix: "ratelimit:bugreports",
+      limiter: Ratelimit.slidingWindow(10, "5m"),
+    }, 5 * 60 * 1000); // 5 minutes in ms
+
+    this.createLimiter("suggestions", {
+      analytics: true,
+      prefix: "ratelimit:suggestions",
+      limiter: Ratelimit.slidingWindow(10, "5m"),
+    }, 5 * 60 * 1000); // 5 minutes in ms
   }
 
   public static getInstance(): RateLimitService {
