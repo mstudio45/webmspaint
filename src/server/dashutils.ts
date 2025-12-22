@@ -242,7 +242,8 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")}
+        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE lrm_serial = ${lrm_serial}
       RETURNING *;
     `;
@@ -257,7 +258,8 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")}
+        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE discord_id = ${user.discord_id}
       RETURNING *;
     `;
@@ -266,7 +268,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
     // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
-        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system
+        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system, is_post_banned
       ) VALUES (
         ${lrm_serial},
         ${user.discord_id},
@@ -274,7 +276,8 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         ${Boolean(user.banned)},
         ${user.status},
         ${Date.now()},
-        ${Boolean(user.note === "Ad Reward")}
+        ${Boolean(user.note === "Ad Reward")},
+        ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       )
       RETURNING *;
     `;
@@ -324,7 +327,8 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")}
+        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE lrm_serial = ${user.user_key}
       RETURNING *;
     `;
@@ -339,7 +343,8 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")}
+        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE discord_id = ${discord_id}
       RETURNING *;
     `;
@@ -348,7 +353,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
     // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
-        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system
+        lrm_serial, discord_id, expires_at, is_banned, user_status, last_sync, from_key_system, is_post_banned
       ) VALUES (
         ${user.user_key},
         ${discord_id},
@@ -356,7 +361,8 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         ${Boolean(user.banned)},
         ${user.status},
         ${Date.now()},
-        ${Boolean(user.note === "Ad Reward")}
+        ${Boolean(user.note === "Ad Reward")},
+        ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       )
       RETURNING *;
     `;
@@ -462,7 +468,8 @@ export async function SyncExpirationsFromLuarmor(
           expires_at      = i.expires_at,
           is_banned       = i.is_banned,
           user_status     = i.user_status,
-          from_key_system = i.from_key_system
+          from_key_system = i.from_key_system,
+          is_post_banned  = i.is_post_banned
         FROM incoming i
         WHERE u.discord_id IS NOT DISTINCT FROM i.discord_id
           AND u.lrm_serial IS DISTINCT FROM i.lrm_serial
@@ -476,7 +483,8 @@ export async function SyncExpirationsFromLuarmor(
           expires_at      = i.expires_at,
           is_banned       = i.is_banned,
           user_status     = i.user_status,
-          from_key_system = i.from_key_system
+          from_key_system = i.from_key_system,
+          is_post_banned  = i.is_post_banned
         FROM incoming i
         WHERE u.lrm_serial IS NOT DISTINCT FROM i.lrm_serial
           AND (u.discord_id IS DISTINCT FROM i.discord_id OR u.expires_at IS DISTINCT FROM i.expires_at
@@ -485,8 +493,8 @@ export async function SyncExpirationsFromLuarmor(
       ),
       -- 3) insert the remaining incoming rows that matched nothing
       inserted AS (
-        INSERT INTO mspaint_users (lrm_serial, discord_id, expires_at, is_banned, user_status, from_key_system)
-        SELECT i.lrm_serial, i.discord_id, i.expires_at, i.is_banned, i.user_status, i.from_key_system
+        INSERT INTO mspaint_users (lrm_serial, discord_id, expires_at, is_banned, user_status, from_key_system, is_post_banned)
+        SELECT i.lrm_serial, i.discord_id, i.expires_at, i.is_banned, i.user_status, i.from_key_system, i.is_post_banned
         FROM incoming i
         LEFT JOIN mspaint_users u
           ON u.lrm_serial IS NOT DISTINCT FROM i.lrm_serial

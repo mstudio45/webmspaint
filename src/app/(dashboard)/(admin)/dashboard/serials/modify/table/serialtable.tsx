@@ -73,6 +73,7 @@ export type SerialDef = {
   lrm_serial?: string;
   expires_at: number | null;
   from_key_system?: boolean;
+  is_post_banned?: boolean;
 };
 
 const claimedAtFilter: FilterFn<SerialDef> = (row, columnId, filterValue) => {
@@ -295,6 +296,36 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
         );
       },
     },
+
+    {
+      accessorKey: "is_post_banned",
+      header: "Post",
+      cell: ({ row }) => {
+        if (syncingRows.has(row.original.serial)) {
+          return (
+            <div className="flex items-center">
+              <LoaderIcon className="h-4 w-4 animate-spin mr-2" />
+              Syncing...
+            </div>
+          );
+        }
+
+        const banned = row.original?.is_post_banned === true;
+
+        return (
+          <div className="flex">
+            {
+              banned ? (
+                <Badge className="justify-center" variant={"destructive"}>❌</Badge>
+              ) : (
+                <Badge className="justify-center" variant={"outline"}>✔</Badge>
+              )
+            }
+          </div>
+        );
+      },
+    },
+
     {
       id: "actions",
       enableHiding: false,
