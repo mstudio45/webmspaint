@@ -55,27 +55,31 @@ export default function Page() {
 
                 <Link
                   href={
-                    "https://ads.luarmor.net/get_key?for=mspaint_key_workink-LQYsmjSYleei"
+                    "https://ads.luarmor.net/get_key?for=mspaint_key_lootlabs-uOaeWbVyXjjC"
                   }
                   className="max-md:w-full"
                 >
                   <Button className="cursor-pointer max-md:w-full">
-                    work.ink{" "}
+                    Lootlabs{" "}
                     <Image
                       className="ml-2"
-                      src="/icons/workink.png"
+                      src="/icons/lootlabs.png"
                       width={25}
                       height={25}
-                      alt="work.ink"
+                      alt="lootlabs"
                     />
                   </Button>
                 </Link>
               </CardFooter>
 
               <div className="text-center text-sm text-muted-foreground mb-3">
-                <Link href={"https://docs.mspaint.cc/key-system"} className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white">User Guide</Link>
+                <Link
+                  href={"https://docs.mspaint.cc/key-system"}
+                  className="transition duration-200 border-b-1 border-transparent hover:border-white hover:text-white"
+                >
+                  User Guide
+                </Link>
               </div>
-
             </Card>
           </BlurFade>
         </div>
