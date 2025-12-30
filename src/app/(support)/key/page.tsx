@@ -55,18 +55,18 @@ export default function Page() {
 
                 <Link
                   href={
-                    "https://ads.luarmor.net/get_key?for=mspaint_key_lootlabs-uOaeWbVyXjjC"
+                    "https://ads.luarmor.net/get_key?for=mspaint_key_linkvertise-GmscbiEaJINm"
                   }
                   className="max-md:w-full"
                 >
                   <Button className="cursor-pointer max-md:w-full">
-                    Lootlabs{" "}
+                    Linkvertise{" "}
                     <Image
                       className="ml-2"
-                      src="/icons/lootlabs.png"
+                      src="/icons/linkvertise.png"
                       width={25}
                       height={25}
-                      alt="lootlabs"
+                      alt="Linkvertise"
                     />
                   </Button>
                 </Link>
