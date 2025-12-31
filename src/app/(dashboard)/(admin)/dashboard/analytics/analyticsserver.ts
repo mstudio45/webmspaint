@@ -45,6 +45,7 @@ async function pullTelemetryData({
     let cursor = workerIndex * CHUNK_SIZE;
     let itemsCollected = 0;
     let batchCount = 0;
+    let emptyBatches = 0;
 
     do {
       const [newCursor, batch] = await kv.sscan(
@@ -54,9 +55,6 @@ async function pullTelemetryData({
       );
       
       const batchData = batch as unknown as TelemetryData[];
-      const remainingNeeded = CHUNK_SIZE - itemsCollected;
-      if (remainingNeeded <= 0 && workerIndex < PARALLEL_WORKERS - 1) break;
-      
       const filteredBatch = batchData.filter(item => {
         if (startDate !== undefined && item.timestamp < startDate) return false;
         if (endDate !== undefined && item.timestamp > endDate) return false;
@@ -64,15 +62,16 @@ async function pullTelemetryData({
         return true;
       });
 
-      const itemsToTake = Math.min(filteredBatch.length, remainingNeeded);
-      workerData.push(...filteredBatch.slice(0, itemsToTake));
-      itemsCollected += itemsToTake;
+      if (filteredBatch.length === 0) {
+        emptyBatches++;
+        if (emptyBatches >= 2) break;
+      } else { emptyBatches = 0; }
+
+      workerData.push(...filteredBatch);
+      itemsCollected += filteredBatch.length;
 
       cursor = parseInt(newCursor);
       batchCount++;
-
-      if (endDate !== undefined && batchData.some(item => item.timestamp > endDate)) break;
-      if (startDate !== undefined && batchData.every(item => item.timestamp < startDate)) break;
 
       if (itemsCollected >= CHUNK_SIZE && workerIndex < PARALLEL_WORKERS - 1) break;
     } while (cursor !== 0);

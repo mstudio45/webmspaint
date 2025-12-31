@@ -365,38 +365,121 @@ export function AnalyticsClient() {
   const [rawDataCurrentPage, setRawDataCurrentPage] = useState(1);
   const [rawDataItemsPerPage, setRawDataItemsPerPage] = useState(10);
 
-  function loadDataWithTimeFilter(timeRange: string) {
-    const now = Date.now();
-    let startDate: number | undefined = undefined;
-    let endDate: number | undefined = undefined;
+  function getDateFilterName(filter: string): string {
+    let name = "";
 
-    switch (timeRange) {
+    switch (filter) {
+      case "today":
+        return "Activity today";
+
+      case "yesterday":
+        return "Activity yesterday";
+
+      case "24hours":
+        name = "24 hours";
+        break;
+
       case "7days":
-        startDate = now - 7 * 24 * 60 * 60 * 1000;
+        name = "7 days";
         break;
+
       case "30days":
-        startDate = now - 30 * 24 * 60 * 60 * 1000;
+        name = "30 days";
         break;
+
       case "90days":
-        startDate = now - 90 * 24 * 60 * 60 * 1000;
-        break;        
+        name = "90 days";
+        break;
+
+      case "currentyear":
+        return "Activity in the current year (" + new Date().getFullYear().toString() + ")";
+
+      case "previousyear":
+        return "Activity in the previous year (" + (new Date().getFullYear() - 1).toString() + ")";
+        
+      case "all":
+        return "All time activity";
+
+      default:
+        name = "Not programmed.";
+        break;
+    }
+
+    return "Activity in the last " + name;
+  }
+
+  function getDateRangeFromFilter(filter: string): { startDate: number | undefined; endDate: number } {
+    const now = Date.now();
+
+    let startDate: number | undefined = undefined;
+    let endDate: number = now;
+
+    switch (filter) {
+      case "today":
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        startDate = today.getTime();
+        break;
+
+      case "yesterday":
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        startDate = yesterday.getTime();
+        
+        const yesterdayEnd = new Date(now);
+        yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+        yesterdayEnd.setHours(23, 59, 59, 999);
+        endDate = yesterdayEnd.getTime();
+        break;
+
       case "24hours":
         startDate = now - 24 * 60 * 60 * 1000;
         break;
+
+      case "7days":
+        const d7 = new Date(now);
+        d7.setDate(d7.getDate() - 7);
+        d7.setHours(0, 0, 0, 0);
+        startDate = d7.getTime();
+        break;
+
+      case "30days":
+        const d30 = new Date(now);
+        d30.setDate(d30.getDate() - 30);
+        d30.setHours(0, 0, 0, 0);
+        startDate = d30.getTime();
+        break;
+
+      case "90days":
+        const d90 = new Date(now);
+        d90.setDate(d90.getDate() - 90);
+        d90.setHours(0, 0, 0, 0);
+        startDate = d90.getTime();
+        break;
+
       case "currentyear":
         const startOfYear = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
         startDate = startOfYear.getTime();
         break;
+
       case "previousyear":
         const previousYear = new Date().getFullYear() - 1;
         startDate = new Date(previousYear, 0, 1, 0, 0, 0, 0).getTime();
         endDate = new Date(previousYear, 11, 31, 23, 59, 59, 999).getTime();
         break;
+
       default:
         // "all" case - no filter
         startDate = undefined;
         break;
     }
+
+    return { startDate, endDate };
+  }
+
+  function loadDataWithTimeFilter(timeRange: string) {
+    const { startDate, endDate } = getDateRangeFromFilter(timeRange);
 
     fetchTelemetryData({
       limit: 100,
@@ -407,17 +490,50 @@ export function AnalyticsClient() {
     setTimeFilter(timeRange);
   }
 
-  const prepareChartData = () => {
+  const prepareChartData = (timeRange: string) => {
     if (!telemetryData.length) return [];
 
     const groupedByDate = telemetryData.reduce<
       Record<string, { count: number }>
     >((acc, item) => {
-      const date = new Date(item.timestamp).toISOString().split("T")[0]; // YYYY-MM-DD
-      if (!acc[date]) {
-        acc[date] = { count: 0 };
+      let key: string;
+      const date = new Date(item.timestamp);
+
+      switch (timeRange) {
+        case "today":
+        case "yesterday":
+        case "24hours":
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
+          break;
+        
+        case "7days":
+        case "30days":
+          key = date.toISOString().split("T")[0]; // YYYY-MM-DD
+          break;
+        
+        case "90days":
+        case "currentyear":
+        case "previousyear":
+          const startOfWeek = new Date(date);
+          const day = startOfWeek.getDay();
+          const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+
+          startOfWeek.setDate(diff);
+          startOfWeek.setHours(0, 0, 0, 0);
+          
+          key = startOfWeek.toISOString().split("T")[0];
+          break;
+        
+        default:
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          key = `${year}-${month}`;
+          break;
       }
-      acc[date].count += 1;
+
+      if (!acc[key]) acc[key] = { count: 0 };
+      acc[key].count += 1;
+
       return acc;
     }, {});
 
@@ -429,7 +545,95 @@ export function AnalyticsClient() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
-  const chartData = prepareChartData();
+  const formatChartDate = (value: string) => {
+    const date = new Date(value);
+    
+    switch (timeFilter) {
+      case "today":
+      case "yesterday":
+      case "24hours":
+        return date.toLocaleTimeString(navigator?.language ?? "en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      
+      case "7days":
+      case "30days":
+        return date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      
+      case "90days":
+      case "currentyear":
+      case "previousyear":
+        return date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      
+      default:
+        return date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          year: "numeric",
+        });
+    }
+  };
+
+  const formatTooltipDate = (value: string) => {
+    const date = new Date(value);
+    
+    switch (timeFilter) {
+      case "today":
+      case "yesterday":
+      case "24hours":
+        const datePart24 = date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+        const timePart24 = date.toLocaleTimeString(navigator?.language ?? "en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+        return `${datePart24} - ${timePart24}`;
+      
+      case "7days":
+      case "30days":
+        return date.toLocaleDateString(navigator?.language ?? "en-US", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+      
+      case "90days":
+      case "currentyear":
+      case "previousyear":
+        const endOfWeek = new Date(date);
+        endOfWeek.setDate(endOfWeek.getDate() + 6);
+        
+        const startStr = date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const endStr = endOfWeek.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        
+        return `${startStr} - ${endStr}`;
+      
+      default:
+        return date.toLocaleDateString(navigator?.language ?? "en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+    }
+  };
+
+  const chartData = prepareChartData(timeFilter);
 
   // Group by game ID instead of place ID for the place distribution
   const placeIdDistribution = telemetryData.reduce<
@@ -438,7 +642,8 @@ export function AnalyticsClient() {
     // Skip items outside the current time filter range
     if (timeFilter !== "all") {
       const itemDate = new Date(placeItem.timestamp).getTime();
-      const startDate = getStartDateFromFilter(timeFilter);
+      const { startDate } = getDateRangeFromFilter(timeFilter);
+
       if (startDate && itemDate < startDate) {
         return placeAcc;
       }
@@ -732,10 +937,15 @@ export function AnalyticsClient() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Time</SelectItem>
+
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="yesterday">Yesterday</SelectItem>
+
                 <SelectItem value="24hours">Last 24 Hours</SelectItem>
                 <SelectItem value="7days">Last 7 Days</SelectItem>
                 <SelectItem value="30days">Last 30 Days</SelectItem>
                 <SelectItem value="90days">Last 90 Days</SelectItem>
+
                 <SelectItem value="currentyear">Current Year</SelectItem>
                 <SelectItem value="previousyear">Previous Year</SelectItem>
               </SelectContent>
@@ -920,28 +1130,13 @@ export function AnalyticsClient() {
                         axisLine={false}
                         tickMargin={8}
                         minTickGap={32}
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return date.toLocaleDateString(navigator?.language ?? "en-US", {
-                            month: "short",
-                            day: "numeric",
-                          });
-                        }}
+                        tickFormatter={formatChartDate}
                       />
                       <ChartTooltip
                         cursor={false}
                         content={
                           <ChartTooltipContent
-                            labelFormatter={(value) => {
-                              return new Date(value).toLocaleDateString(
-                                navigator?.language ?? "en-US",
-                                {
-                                  month: "long",
-                                  day: "numeric",
-                                  year: "numeric",
-                                }
-                              );
-                            }}
+                            labelFormatter={formatTooltipDate}
                             indicator="dot"
                           />
                         }
@@ -1537,13 +1732,15 @@ export function AnalyticsClient() {
               <CardFooter>
                 {hasMore && (
                   <Button
-                    onClick={() =>
+                    onClick={() => {
+                      const { startDate, endDate } = getDateRangeFromFilter(timeFilter);
                       fetchTelemetryData({
                         limit: 20,
                         offset: telemetryData.length,
-                        startDate: timeFilter !== "all" ? getStartDateFromFilter(timeFilter) : undefined
+                        startDate: startDate,
+                        endDate: endDate
                       })
-                    }
+                    }}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -1563,47 +1760,4 @@ export function AnalyticsClient() {
       </div>
     </GameCacheProvider>
   );
-}
-
-function getDateFilterName(filter: string): string {
-  let name = "";
-  switch (filter) {
-    case "24hours":
-      name = "24 hours"
-      break;
-    case "7days":
-      name = "7 days"
-      break;
-    case "30days":
-      name = "30 days"
-      break;
-    case "90days":
-      name = "90 days"
-      break;
-    case "currentyear":
-      return "Activity in the current year (" + new Date().getFullYear().toString() + ")"
-    case "previousyear":
-      return "Activity in the previous year (" + (new Date().getFullYear() - 1).toString() + ")"
-    case "all":
-      return "All time activity"
-    default:
-      name = "Not programmed."
-      break;
-  }
-  return "Activity in the last " + name;
-}
-
-// Helper function to get start date from filter
-function getStartDateFromFilter(filter: string): number | undefined {
-  const now = Date.now();
-  switch (filter) {
-    case "24hours":
-      return now - 24 * 60 * 60 * 1000;
-    case "7days":
-      return now - 7 * 24 * 60 * 60 * 1000;
-    case "30days":
-      return now - 30 * 24 * 60 * 60 * 1000;
-    default:
-      return undefined;
-  }
 }
