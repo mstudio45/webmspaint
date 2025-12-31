@@ -368,6 +368,7 @@ export function AnalyticsClient() {
   function loadDataWithTimeFilter(timeRange: string) {
     const now = Date.now();
     let startDate: number | undefined = undefined;
+    let endDate: number | undefined = undefined;
 
     switch (timeRange) {
       case "7days":
@@ -382,6 +383,15 @@ export function AnalyticsClient() {
       case "24hours":
         startDate = now - 24 * 60 * 60 * 1000;
         break;
+      case "currentyear":
+        const startOfYear = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
+        startDate = startOfYear.getTime();
+        break;
+      case "previousyear":
+        const previousYear = new Date().getFullYear() - 1;
+        startDate = new Date(previousYear, 0, 1, 0, 0, 0, 0).getTime();
+        endDate = new Date(previousYear, 11, 31, 23, 59, 59, 999).getTime();
+        break;
       default:
         // "all" case - no filter
         startDate = undefined;
@@ -390,7 +400,8 @@ export function AnalyticsClient() {
 
     fetchTelemetryData({
       limit: 100,
-      startDate
+      startDate: startDate,
+      endDate: endDate
     });
 
     setTimeFilter(timeRange);
@@ -725,6 +736,8 @@ export function AnalyticsClient() {
                 <SelectItem value="7days">Last 7 Days</SelectItem>
                 <SelectItem value="30days">Last 30 Days</SelectItem>
                 <SelectItem value="90days">Last 90 Days</SelectItem>
+                <SelectItem value="currentyear">Current Year</SelectItem>
+                <SelectItem value="previousyear">Previous Year</SelectItem>
               </SelectContent>
             </Select>
 
@@ -1567,6 +1580,10 @@ function getDateFilterName(filter: string): string {
     case "90days":
       name = "90 days"
       break;
+    case "currentyear":
+      return "Activity in the current year (" + new Date().getFullYear().toString() + ")"
+    case "previousyear":
+      return "Activity in the previous year (" + (new Date().getFullYear() - 1).toString() + ")"
     case "all":
       return "All time activity"
     default:

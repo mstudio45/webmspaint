@@ -27,8 +27,10 @@ const PARALLEL_WORKERS = 25;
  * Get telemetry data
  */
 async function pullTelemetryData({
+  startDate,
   endDate,
 }: {
+  startDate?: number;
   endDate?: number;
 }): Promise<TelemetryData[]> {
   const totalCount = await kv.scard('telemetryv2:all-keys');
@@ -55,14 +57,23 @@ async function pullTelemetryData({
       const remainingNeeded = CHUNK_SIZE - itemsCollected;
       if (remainingNeeded <= 0 && workerIndex < PARALLEL_WORKERS - 1) break;
       
-      const itemsToTake = Math.min(batchData.length, remainingNeeded);
-      workerData.push(...batchData.slice(0, itemsToTake));
+      const filteredBatch = batchData.filter(item => {
+        if (startDate !== undefined && item.timestamp < startDate) return false;
+        if (endDate !== undefined && item.timestamp > endDate) return false;
+
+        return true;
+      });
+
+      const itemsToTake = Math.min(filteredBatch.length, remainingNeeded);
+      workerData.push(...filteredBatch.slice(0, itemsToTake));
       itemsCollected += itemsToTake;
-      
+
       cursor = parseInt(newCursor);
       batchCount++;
 
       if (endDate !== undefined && batchData.some(item => item.timestamp > endDate)) break;
+      if (startDate !== undefined && batchData.every(item => item.timestamp < startDate)) break;
+
       if (itemsCollected >= CHUNK_SIZE && workerIndex < PARALLEL_WORKERS - 1) break;
     } while (cursor !== 0);
     
@@ -96,7 +107,7 @@ export async function getTelemetryData({
   filteredCount: number;
 }> {
   try {
-    const allKeys: TelemetryData[] = await pullTelemetryData({ endDate });
+    const allKeys: TelemetryData[] = await pullTelemetryData({ startDate, endDate });
     const totalCount = allKeys.length;
 
     let validData = allKeys.filter((item): item is TelemetryData => item !== null);
