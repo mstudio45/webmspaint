@@ -84,7 +84,7 @@ export default function BugreportCard({
     const isSubscriptionActive = (!isBanned && isMember) && (userStatus === "active" || isResetState || isLifetime);
     const isPostBanned = subscription?.is_post_banned === true;
 
-    if (isUnlink || !isSubscriptionActive) return <InvalidSubscriptionCard text={"You don't have any active subsctiption."} textClassName={"text-orange-500"} />
+    if (isUnlink || !isSubscriptionActive) return <InvalidSubscriptionCard text={"You don't have any active subscription."} textClassName={"text-orange-500"} />
     if (isPostBanned || isBanned) return <InvalidSubscriptionCard text={"You are not allowed to report bugs."} textClassName={"text-red-500"} />
 
     return (
