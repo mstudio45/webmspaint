@@ -27,9 +27,8 @@ export async function RequestLuarmorUsersEndpoint(
   body: unknown = null,
   path: string = ""
 ) {
-  const apiUrl = `${process.env.LRM_PROXY_URL}/v3/projects/${
-    process.env.LRM_PROJECT_ID
-  }/users${filters == "" ? "" : "?" + filters}${path}`;
+  const apiUrl = `${process.env.LRM_PROXY_URL}/v3/projects/${process.env.LRM_PROJECT_ID
+    }/users${filters == "" ? "" : "?" + filters}${path}`;
 
   if (body) {
     const response = await fetch(apiUrl, {
@@ -97,7 +96,7 @@ export async function GenerateSerial(
 export async function DeleteSerial(serial: string) {
   const allowed = await isUserAllowedOnDashboard();
   if (!allowed) return { status: 403, error: "nah" };
-  
+
   const { rows } =
     await sql`SELECT * FROM mspaint_keys_new WHERE serial = ${serial}`;
 
@@ -189,7 +188,7 @@ export async function GetAllUserData() {
  * @returns 
 */
 
-export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_dashboard: boolean = true, 
+export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_dashboard: boolean = true,
   override_data?: {
     users: {
       auth_expire: string;
@@ -219,13 +218,13 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
 
     data = await response.json();
   }
-  
+
   const user = data ? data.users[0] : override_data?.users[0];
   if (!user) {
     await sql`UPDATE mspaint_users
       SET user_status = 'unlink'
       WHERE user_status IS DISTINCT FROM 'unlink' AND lrm_serial = ${lrm_serial}
-    `;    
+    `;
     return { status: 404, error: "User not found in Luarmor." };
   }
 
@@ -248,7 +247,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
       RETURNING *;
     `;
     if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by Luarmor Key)" };
-    
+
     // Sync by Discord ID
     result = await sql`
       UPDATE mspaint_users
@@ -264,7 +263,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
       RETURNING *;
     `;
     if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by discord ID)" };
-    
+
     // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
@@ -311,7 +310,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
     await sql`UPDATE mspaint_users
       SET user_status = 'unlink'
       WHERE user_status IS DISTINCT FROM 'unlink' AND discord_id = ${discord_id}
-    `;    
+    `;
     return { status: 404, error: "User not found in Luarmor." };
   }
 
@@ -349,7 +348,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
       RETURNING *;
     `;
     if (result.rowCount || 0 > 0) return { status: 200, success: "User synced successfully (by discord ID)" };
-    
+
     // Insert if not found
     result = await sql`
       INSERT INTO mspaint_users (
@@ -383,27 +382,27 @@ export async function SyncExpirationsFromLuarmor(
   }
 
   const batchSize = 1500;
-  
+
   const minRange = (step - 1) * batchSize;
   const maxRange = minRange + batchSize - 1;
-  
+
   // 1. Fetch the batch
   await rateLimitService.trackRequest("syncuser");
   const response = await RequestLuarmorUsersEndpoint(
     HTTP_METHOD.GET,
     `from=${minRange}&until=${maxRange}`
   );
-  
+
   if (!response.ok) {
     return {
       status: 500,
       error: `Luarmor API error: ${response.status}`,
     };
   }
-  
+
   const data = await response.json();
   const users = data.users || [];
-  
+
   //need to get before filtering to avoid step issues
   const totalUsers = users.length;
   let totalUpdated = 0;
@@ -442,22 +441,31 @@ export async function SyncExpirationsFromLuarmor(
     r.expires_at,
     r.is_banned,
     r.user_status,
+    r.from_key_system,
+    r.is_post_banned
   ]);
 
   const placeholders = filteredRows
     .map((_: unknown, i: number) => {
-      const baseIndex = i * 5;
-      return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}::bigint, $${baseIndex + 4}::boolean, $${baseIndex + 5})`;
+      const baseIndex = i * 7;
+      return `($${baseIndex + 1}, 
+        $${baseIndex + 2}, 
+        $${baseIndex + 3}::bigint, 
+        $${baseIndex + 4}::boolean, 
+        $${baseIndex + 5}, 
+        $${baseIndex + 6}::boolean, 
+        $${baseIndex + 7}::boolean
+      )`;
     })
-  .join(", ");
+    .join(", ");
 
   // Bulk INSERT … ON CONFLICT … DO UPDATE
   if (filteredRows.length > 0) {
     // prepare unlink
     if (step == 1) await sql`UPDATE mspaint_users SET user_status = 'unlink';`;
-    
+
     const queryUpsert = `
-      WITH incoming (lrm_serial, discord_id, expires_at, is_banned, user_status) AS (
+      WITH incoming (lrm_serial, discord_id, expires_at, is_banned, user_status, from_key_system, is_post_banned) AS (
         VALUES ${placeholders}
       ),
       -- 1) update rows that match incoming discord_id
@@ -509,7 +517,7 @@ export async function SyncExpirationsFromLuarmor(
     `;
     const upsertResult = await sql.query(queryUpsert, values);
 
-    const insertSerialCount  = Number(upsertResult.rows[0].updated_by_discord_count || 0);
+    const insertSerialCount = Number(upsertResult.rows[0].updated_by_discord_count || 0);
     const insertDiscordCount = Number(upsertResult.rows[0].updated_by_serial_count || 0);
     const insertedCount = Number(upsertResult.rows[0].inserted_count || 0);
 
