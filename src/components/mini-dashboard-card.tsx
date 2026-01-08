@@ -112,7 +112,7 @@ export default function MiniDashboardCard({
     }
 
     setRedeemError(null);
-    toast.info("Redirected to a new page.",);
+    toast.info("Redirected to a new page.");
 
     const formatKey = (key ?? "invalid");
     if (formatKey.startsWith("https://www.mspaint.cc/purchase/completed?serial=")) {
