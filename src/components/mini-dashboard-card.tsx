@@ -8,8 +8,8 @@ import {
   BugOffIcon,
   LockKeyholeIcon,
   LockKeyholeOpenIcon,
+  MailPlus,
   PackageIcon,
-  PackagePlusIcon,
 } from "lucide-react";
 import { RainbowButton } from "./magicui/rainbow-button";
 import { TimeUpdater } from "./time-updater";
@@ -112,7 +112,7 @@ export default function MiniDashboardCard({
     }
 
     setRedeemError(null);
-    toast.info("Redirected to a new page.", );
+    toast.info("Redirected to a new page.",);
 
     const formatKey = (key ?? "invalid");
     if (formatKey.startsWith("https://www.mspaint.cc/purchase/completed?serial=")) {
@@ -121,7 +121,7 @@ export default function MiniDashboardCard({
       window.open(`https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(formatKey)}`, "_blank");
     }
   };
-  
+
   if (!session || !session.user) {
     router.push("/sign-in");
     return null;
@@ -375,7 +375,7 @@ export default function MiniDashboardCard({
                                             const errorData = await response.json();
                                             throw new Error(
                                               errorData.error ||
-                                                "HWID reset failed."
+                                              "HWID reset failed."
                                             );
                                           }
 
@@ -492,12 +492,12 @@ export default function MiniDashboardCard({
                               router.push("/subscription-dashboard/suggestion")
                             }}
                           >
-                            <PackagePlusIcon />
+                            <MailPlus />
                             <span className="text-xs sm:text-sm">
                               Suggestion
                             </span>
                           </Button>
-                        </div>  
+                        </div>
                       </>
                     ) : (
                       <div className="w-full grid grid-cols-2 gap-2 justify-center items-center mt-4">
@@ -519,7 +519,7 @@ export default function MiniDashboardCard({
                           >
                             Contact Support
                           </Button>
-                        </Link>                
+                        </Link>
                       </div>
                     )}
 
@@ -530,7 +530,7 @@ export default function MiniDashboardCard({
                         <>
                           {isLifetime ? (
                             <>
-                              <RainbowButton 
+                              <RainbowButton
                                 className="w-full"
                                 onClick={() => setGiftKeyDialog(true)}
                               >
@@ -538,9 +538,9 @@ export default function MiniDashboardCard({
                               </RainbowButton>
 
                               <Dialog
-                                  open={getGiftKeyDialog}
-                                  onOpenChange={setGiftKeyDialog}
-                                >
+                                open={getGiftKeyDialog}
+                                onOpenChange={setGiftKeyDialog}
+                              >
                                 <DialogContent>
                                   <DialogHeader>
                                     <DialogTitle>
@@ -548,8 +548,8 @@ export default function MiniDashboardCard({
                                     </DialogTitle>
                                     <div className="text-muted-foreground text-xs sm:text-sm">
                                       <p>
-                                        Thank you for purchasing mspaint lifetime.<br/>
-                                        If you&apos;re feeling generous you can buy mspaint keys for your friends, or giveaways!<br/>
+                                        Thank you for purchasing mspaint lifetime.<br />
+                                        If you&apos;re feeling generous you can buy mspaint keys for your friends, or giveaways!<br />
                                       </p>
                                     </div>
                                   </DialogHeader>
@@ -566,7 +566,7 @@ export default function MiniDashboardCard({
                             </>
                           ) : (
                             <>
-                              <RainbowButton 
+                              <RainbowButton
                                 className="w-full"
                                 onClick={() => setRedeemDialog(true)}
                               >
@@ -574,21 +574,21 @@ export default function MiniDashboardCard({
                               </RainbowButton>
 
                               <Dialog
-                                  open={getRedeemDialog}
-                                  onOpenChange={setRedeemDialog}
-                                >
+                                open={getRedeemDialog}
+                                onOpenChange={setRedeemDialog}
+                              >
                                 <DialogContent>
                                   <DialogHeader>
                                     <DialogTitle>
                                       Enter your key below.
                                     </DialogTitle>
                                     <div className="text-muted-foreground text-xs sm:text-sm">
-                                      <p>Example, you can paste just the code:<br/>
-                                        &nbsp;<code className="text-stone-200">0123456789ABCDEF</code><br/>
-                                        Or the full link:<br/>
+                                      <p>Example, you can paste just the code:<br />
+                                        &nbsp;<code className="text-stone-200">0123456789ABCDEF</code><br />
+                                        Or the full link:<br />
                                         &nbsp;<code className="text-stone-200">https://www.mspaint.cc/purchase/completed?serial=0123456789ABCDEF</code>
                                       </p>
-                                      <br/>
+                                      <br />
                                       A new page will be created to claim the key.
                                     </div>
 
@@ -648,17 +648,17 @@ export default function MiniDashboardCard({
                 )}
 
                 <AlertDialog
-                    open={getSignOutDialog}
-                    onOpenChange={setSignOutDialog}
-                  >
+                  open={getSignOutDialog}
+                  onOpenChange={setSignOutDialog}
+                >
                   <AlertDialogContent className="max-w-xl">
                     <AlertDialogHeader>
                       <AlertDialogTitle>
                         Are you sure you want to Sign out?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        You can sign in at anytime by going through{" "}<Link 
-                          className="text-blue-400 underline break-all" 
+                        You can sign in at anytime by going through{" "}<Link
+                          className="text-blue-400 underline break-all"
                           href="/sign-in"
                           target="_blank"
                         >
@@ -674,7 +674,7 @@ export default function MiniDashboardCard({
                         onClick={signout}
                       >
                         Sign Out
-                      </Button>                          
+                      </Button>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
