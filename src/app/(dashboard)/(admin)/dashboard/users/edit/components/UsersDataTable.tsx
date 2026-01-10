@@ -65,6 +65,8 @@ export type UserDef = {
   discord_id: string;
   expires_at: number | null;
   is_banned: boolean;
+  from_key_system?: boolean;
+  is_post_banned?: boolean;
 };
 
 export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
@@ -193,6 +195,26 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
       },
     },
     {
+      accessorKey: "from_key_system",
+      header: "From Key System",
+      cell: ({ row }) => {
+        const fromKeySystem = row.original?.from_key_system === true;
+
+        return (
+          <div className="flex">
+            {
+              !fromKeySystem ? (
+                <Badge className="justify-center" variant={"outline"}>❌</Badge>
+              ) : (
+                <Badge className="justify-center" variant={"outline"}>✔</Badge>
+              )
+            }
+          </div>
+        );
+      },
+    },
+
+    {
       accessorKey: "discord_id",
       header: "Discord ID",
     },
@@ -248,6 +270,7 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
         );
       },
     },
+    
     {
       accessorKey: "is_banned",
       header: () => <p className="ml-2">Banned</p>,
@@ -256,12 +279,32 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
         return (
           <div className="flex flex-col-2 ml-3">
             <Badge variant={is_banned ? "destructive" : "outline"}>
-              {is_banned ? "Yes" : "No"}
+              {is_banned ? "✔" : "❌"}
             </Badge>
           </div>
         );
       },
     },
+    {
+      accessorKey: "is_post_banned",
+      header: "Post Banned",
+      cell: ({ row }) => {
+        const banned = row.original?.is_post_banned === true;
+
+        return (
+          <div className="flex flex-col-2 ml-5">
+            {
+              banned ? (
+                <Badge className="justify-center" variant={"destructive"}>✔</Badge>
+              ) : (
+                <Badge className="justify-center" variant={"outline"}>❌</Badge>
+              )
+            }
+          </div>
+        );
+      },
+    },
+
     {
       id: "actions",
       enableHiding: false,
@@ -433,7 +476,7 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
           placeholder={`Filter by ${filterTarget}...`}
           value={filterValue}
           onChange={(event) => {
-            if (filterTarget == "is_banned") {
+            if (filterTarget == "is_banned" || filterTarget == "is_post_banned") {
               const text = event.target.value;
 
               if (text.trim() == "") {
@@ -450,6 +493,23 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
               } else {
                 table.getColumn(filterTarget)?.setFilterValue(true);
               }
+            } else if (filterTarget == "from_key_system") {
+              const text = event.target.value;
+
+              if (text.trim() == "") {
+                table.getColumn(filterTarget)?.setFilterValue(undefined);
+                setFilterValue(event.target.value);
+                return;
+              }
+
+              if (
+                text.toLowerCase().includes("yes") ||
+                text.toLowerCase().includes("key s")
+              ) {
+                table.getColumn(filterTarget)?.setFilterValue(true);
+              } else {
+                table.getColumn(filterTarget)?.setFilterValue(false);
+              }
             } else {
               table.getColumn(filterTarget)?.setFilterValue(event.target.value);
             }
@@ -463,7 +523,7 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
             table.getColumn(filterTarget)?.setFilterValue(undefined);
             setFilterValue("");
             setFilterTarget(value);
-            if (value == "is_banned") {
+            if (value == "is_banned" || value == "is_post_banned" || value == "from_key_system") {
               table.getColumn(value)?.setFilterValue(true);
             }
           }}
@@ -474,6 +534,8 @@ export default function UsersDataTable({ data }: DataTableProps<UserDef>) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="is_banned">Ban Status</SelectItem>
+            <SelectItem value="is_post_banned">Post Ban Status</SelectItem>
+            <SelectItem value="from_key_system">Key System</SelectItem>
             <SelectItem value="discord_id">Discord ID</SelectItem>
             <SelectItem value="lrm_serial">Luarmor Key</SelectItem>
           </SelectContent>

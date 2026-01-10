@@ -231,8 +231,8 @@ export default function MiniDashboardCard({
                             ) : (
                               <div className={cn("flex flex-col gap-1", isKeySystemMember ? "mt-2" : "")}>
                                 {isKeySystemMember && (
-                                  <p className="text-base text-orange-400">
-                                    Key From Key System
+                                  <p className="text-base text-green-400">
+                                    Key System Key
                                   </p>
                                 )}
                                 <TimeUpdater

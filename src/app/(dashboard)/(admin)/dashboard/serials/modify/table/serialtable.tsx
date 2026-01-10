@@ -211,7 +211,7 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
           <div className="flex w-[90px]">
             {
               fromKeySystem ? (
-                <Badge className="justify-center w-[84px]" variant={"secondary"}>Key System</Badge>
+                <Badge className="justify-center w-[84px]" variant={"secondary"}>{keyDuration}</Badge>
               ) : (<>
                 {!keyDuration ? (
                   <Badge className="justify-center w-[84px]" variant={"default"}>Lifetime</Badge>

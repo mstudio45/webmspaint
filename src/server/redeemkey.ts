@@ -116,7 +116,7 @@ export async function RedeemKey(serial: string, user_id: string) {
 
   let isCheckpointKey = false;
   if (lrmUserFound) {
-    if (lrmUserData.note === "Ad Reward") {
+    if (lrmUserData.note.startsWith("Ad Reward")) {
       isCheckpointKey = true;
     }
 
@@ -137,7 +137,7 @@ export async function RedeemKey(serial: string, user_id: string) {
     );
   }
 
-  const validFor: string | null = serialKeyData.key_duration; //null for lifetime
+  const validFor: string | null = serialKeyData.key_duration; // null for lifetime
   const lifetimeDate = -1;
 
   let luarmorSerialKey = "";

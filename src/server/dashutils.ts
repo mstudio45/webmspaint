@@ -225,7 +225,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
       SET user_status = 'unlink'
       WHERE user_status IS DISTINCT FROM 'unlink' AND lrm_serial = ${lrm_serial}
     `;
-    return { status: 404, error: "User not found in Luarmor." };
+    return { status: 404, error: "Key not found in Luarmor." };
   }
 
   const timestamp_expire = parseInt(user.auth_expire, 10);
@@ -241,7 +241,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        from_key_system = ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE lrm_serial = ${lrm_serial}
       RETURNING *;
@@ -257,7 +257,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        from_key_system = ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE discord_id = ${user.discord_id}
       RETURNING *;
@@ -275,7 +275,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
         ${Boolean(user.banned)},
         ${user.status},
         ${Date.now()},
-        ${Boolean(user.note === "Ad Reward")},
+        ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       )
       RETURNING *;
@@ -326,7 +326,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        from_key_system = ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE lrm_serial = ${user.user_key}
       RETURNING *;
@@ -342,7 +342,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         is_banned = ${Boolean(user.banned)},
         user_status = ${user.status},
         last_sync = ${Date.now()},
-        from_key_system = ${Boolean(user.note === "Ad Reward")},
+        from_key_system = ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         is_post_banned = ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       WHERE discord_id = ${discord_id}
       RETURNING *;
@@ -360,7 +360,7 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
         ${Boolean(user.banned)},
         ${user.status},
         ${Date.now()},
-        ${Boolean(user.note === "Ad Reward")},
+        ${Boolean(user.note && String(user.note ?? "").startsWith("Ad Reward"))},
         ${Boolean(user.note && String(user.note ?? "").toLowerCase().includes("post blacklist"))}
       )
       RETURNING *;
@@ -412,7 +412,7 @@ export async function SyncExpirationsFromLuarmor(
   const filteredRows = users
     .filter(
       (u: { discord_id: string; note?: string }) =>
-        u.discord_id != "" && u.note != "Ad Reward"
+        u.discord_id != ""
     )
     .map(
       (u: {
@@ -421,15 +421,17 @@ export async function SyncExpirationsFromLuarmor(
         auth_expire: string;
         banned: boolean;
         status: string;
+        note: string;
       }) => {
         const expireAt = parseInt(u.auth_expire, 10);
         return {
           lrm_serial: u.user_key!,
           discord_id: u.discord_id,
-          expires_at:
-            expireAt === -1 ? -1 : new Date(expireAt * 1000).getTime(),
+          expires_at: expireAt === -1 ? -1 : new Date(expireAt * 1000).getTime(),
           is_banned: Boolean(u.banned),
           user_status: u.status,
+          from_key_system: Boolean(u.note && String(u.note ?? "").startsWith("Ad Reward")),
+          is_post_banned: Boolean(u.note && String(u.note ?? "").toLowerCase().includes("post blacklist"))
         };
       }
     );
