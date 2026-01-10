@@ -77,6 +77,7 @@ export default function BugreportCard({
     // Determine subscription status
     const isMember = subscription != null;
     const isLifetime = expirationDate == -1;
+    const isKeySystem = subscription?.from_key_system === true;
 
     const isUnlink = userStatus === "unlink";
     const isResetState = userStatus === "reset";
@@ -84,7 +85,7 @@ export default function BugreportCard({
     const isSubscriptionActive = (!isBanned && isMember) && (userStatus === "active" || isResetState || isLifetime);
     const isPostBanned = subscription?.is_post_banned === true;
 
-    if (isUnlink || !isSubscriptionActive) return <InvalidSubscriptionCard text={"You don't have any active subscription."} textClassName={"text-orange-500"} />
+    if (!isKeySystem && !isSubscriptionActive) return <InvalidSubscriptionCard text={"You don't have any active subscription."} textClassName={"text-orange-500"} />
     if (isPostBanned || isBanned) return <InvalidSubscriptionCard text={"You are not allowed to report bugs."} textClassName={"text-red-500"} />
 
     return (

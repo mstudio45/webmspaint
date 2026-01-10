@@ -592,7 +592,12 @@ export default async function Home() {
                 Where can I report bugs and suggest features?
               </AccordionTrigger>
               <AccordionContent>
-                You can report bugs and suggest features in the Discord server.
+                You can report bugs and suggest features in the <Link
+                  className="text-white-500 underline"
+                  href={"/subscription-dashboard"}
+                >
+                  Dashboard
+                </Link>.
               </AccordionContent>
             </AccordionItem>
 

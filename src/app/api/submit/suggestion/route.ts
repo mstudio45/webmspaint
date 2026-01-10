@@ -4,6 +4,8 @@ import { gamesList } from "@/data/games";
 import { rateLimitService } from "@/server/ratelimit";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from 'zod';
+import { GetUserSubscription } from "@/server/dashutils";
+import { normalizeEpochMs } from "@/lib/utils";
 
 const customGameList = [ "mspaint", "Universal", ...gamesList ];
 
@@ -19,8 +21,8 @@ const schema = z.object({
     })
 });
 
-function formDataToObject(formData: FormData, ignoreFile?: boolean): Record<string, string | File> {
-  const obj: Record<string, string | File> = {};
+function formDataToObject(formData: FormData, ignoreFile?: boolean): Record<string, string | File | boolean> {
+  const obj: Record<string, string | File | boolean> = {};
 
   for (const [key, value] of formData.entries()) {
     if (value instanceof File) {
@@ -86,7 +88,27 @@ export async function POST(request: NextRequest) {
     // track cooldown request //
     await rateLimitService.trackRequest("suggestions", discordId);
 
-  // check for mspaint bot //
+    const subscription = await GetUserSubscription(discordId);
+    if (!subscription) {
+      return NextResponse.json({ status: "error", error: [{ message: "Unauthorized" }] }, { status: 401 });
+    }
+    
+    const expirationDate = normalizeEpochMs(subscription?.expires_at) ?? 0;
+    const userStatus: string = subscription ? subscription.user_status : "unlink";
+
+    const isMember = subscription != null;
+    const isLifetime = expirationDate == -1;
+    const isKeySystem = subscription?.from_key_system === true;
+
+    const isResetState = userStatus === "reset";
+    const isBanned = userStatus === "banned" || subscription?.is_banned;
+    const isSubscriptionActive = (!isBanned && isMember) && (userStatus === "active" || isResetState || isLifetime);
+    const isPostBanned = subscription?.is_post_banned === true;
+    
+    if (!isKeySystem && !isSubscriptionActive) return NextResponse.json({ status: "error", error: [{ message: "Unauthorized" }] }, { status: 401 });
+    if (isPostBanned || isBanned) return NextResponse.json({ status: "error", error: [{ message: "Banned" }] }, { status: 401 });
+
+    // check for mspaint bot //
     const response = await fetch(
         "https://irc.mspaint.cc/v1/users/1300942082076053554",
         { cache: "force-cache", next: { revalidate: 120 } } // 2 minutes
@@ -101,6 +123,7 @@ export async function POST(request: NextRequest) {
     const suggestionId = generateId();
     const suggestionJson = formDataToObject(rawFormData, true);
     suggestionJson["__id"] = suggestionId.toString();
+    suggestionJson["__key_system"] = isKeySystem;
 
     const payload = {
       content:
