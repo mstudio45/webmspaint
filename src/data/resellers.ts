@@ -9,9 +9,14 @@ export const RESELLER_DATA = {
       webhook: process.env.BLOXPRODUCTS_WEBHOOK!,
       discord: "https://bloxproducts.com/discord",
     },
-    robloxcheatz: {
-      name: "RobloxCheatz",
-      webhook: process.env.ROBLOXCHEATZ_WEBHOOK!,
-      discord: "https://discord.gg/ilya",
+    yesucc: {
+      name: "YesuCC",
+      webhook: process.env.YESUCC_WEBHOOK!,
+      discord: "https://shop.yesucc.cc/",
     },
+    outlaw: {
+      name: "Outlaw",
+      webhook: process.env.OUTLAW_WEBHOOK!,
+      discord: "https://discord.gg/getoutlaw"
+    }
 };

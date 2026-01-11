@@ -242,7 +242,7 @@ export default function SyncLuarmorComponent() {
           )}
 
           <div className="flex items-start gap-3">
-            <Checkbox id="use_lrm_key" checked={useLuarmorKey} onCheckedChange={setUseLuarmorKey} />
+            <Checkbox id="use_lrm_key" checked={useLuarmorKey} onCheckedChange={(value) => setUseLuarmorKey(value === true)} />
             <Label htmlFor="use_lrm_key">Sync by Luarmor Key instead?</Label>
           </div>
 

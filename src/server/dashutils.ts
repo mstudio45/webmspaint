@@ -195,6 +195,7 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
       discord_id: string;
       banned: number;
       status: string;
+      note: string;
     }[]
   }
 ) {
@@ -222,10 +223,13 @@ export async function SyncSingleLuarmorUserByLRMSerial(lrm_serial: string, from_
   const user = data ? data.users[0] : override_data?.users[0];
   if (!user) {
     await sql`UPDATE mspaint_users
-      SET user_status = 'unlink'
-      WHERE user_status IS DISTINCT FROM 'unlink' AND lrm_serial = ${lrm_serial}
+      SET user_status = 'unlink',
+          lrm_serial = '',
+          expires_at = ${Date.now() + 1000},
+          from_key_system = FALSE
+      WHERE (user_status IS DISTINCT FROM 'unlink' OR lrm_serial != '') AND lrm_serial = ${lrm_serial}
     `;
-    return { status: 404, error: "Key not found in Luarmor." };
+    return { status: 404, error: "Key was not found in Luarmor." };
   }
 
   const timestamp_expire = parseInt(user.auth_expire, 10);
@@ -308,10 +312,13 @@ export async function SyncSingleLuarmorUserByDiscord(discord_id: string, from_da
 
   if (!user) {
     await sql`UPDATE mspaint_users
-      SET user_status = 'unlink'
-      WHERE user_status IS DISTINCT FROM 'unlink' AND discord_id = ${discord_id}
+      SET user_status = 'unlink',
+          lrm_serial = '',
+          expires_at = ${Date.now() + 1000},
+          from_key_system = FALSE
+      WHERE (user_status IS DISTINCT FROM 'unlink' OR lrm_serial != '') AND discord_id = ${discord_id}
     `;
-    return { status: 404, error: "User not found in Luarmor." };
+    return { status: 404, error: "Key with the provided Discord ID was not found in Luarmor." };
   }
 
   const timestamp_expire = parseInt(user.auth_expire, 10);

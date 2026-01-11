@@ -112,16 +112,17 @@ export async function RedeemKey(serial: string, user_id: string) {
     };
   }
 
-  const lrmUserFound = lrmUserData.users.length !== 0;
-
+  let lrmUserFound = lrmUserData.users.length !== 0;
+  let currentUserLrmData = lrmUserFound ? lrmUserData.users[0] : null;
   let isCheckpointKey = false;
+
   if (lrmUserFound) {
-    if (lrmUserData.note.startsWith("Ad Reward")) {
+    if (currentUserLrmData.note.startsWith("Ad Reward")) {
       isCheckpointKey = true;
     }
 
     if (!isCheckpointKey) {
-      if (lrmUserData.users[0].auth_expire == -1) {
+      if (currentUserLrmData.auth_expire == -1) {
         return {
           status: 403,
           error: "You already have a lifetime key!",
@@ -133,25 +134,33 @@ export async function RedeemKey(serial: string, user_id: string) {
   if (isCheckpointKey) {
     await RequestLuarmorUsersEndpoint(
       HTTP_METHOD.DELETE,
-      `user_key=${lrmUserData.users[0].user_key}`
+      `user_key=${currentUserLrmData.user_key}`
     );
+
+    lrmUserFound = false;
+    currentUserLrmData = null;
   }
 
   const validFor: string | null = serialKeyData.key_duration; // null for lifetime
   const lifetimeDate = -1;
 
+  const newUserNote = (serialKeyData.order_id ?? "Generic ID") + " - " + serial;
   let luarmorSerialKey = "";
   let timeToBeAdded = claimedAtUnixtimestamp;
-  if (lrmUserFound) {
-    luarmorSerialKey = lrmUserData.users[0].user_key;
 
-    //Updating an existing user
+  if (lrmUserFound) {
+    luarmorSerialKey = currentUserLrmData.user_key;
+
+    // Updating an existing user
     const addSubscriptionTime = validFor
-      ? lrmUserData.users[0].auth_expire + parseIntervalToSec(validFor)
+      ? currentUserLrmData.auth_expire + parseIntervalToSec(validFor)
       : lifetimeDate;
+
     const response = await RequestLuarmorUsersEndpoint(HTTP_METHOD.PATCH, "", {
       user_key: luarmorSerialKey,
-      auth_expire: addSubscriptionTime,
+      discord_id: user_id,
+      note: newUserNote,
+      auth_expire: addSubscriptionTime
     });
 
     timeToBeAdded = addSubscriptionTime;
@@ -163,15 +172,15 @@ export async function RedeemKey(serial: string, user_id: string) {
       };
     }
   } else {
-    //Creating a new user
+    // Creating a new user
     const createSubscriptionTime = validFor
       ? claimedAtUnixtimestamp + parseIntervalToSec(validFor)
       : lifetimeDate;
-      
+
     const response = await RequestLuarmorUsersEndpoint(HTTP_METHOD.POST, "", {
       discord_id: user_id,
-      note: (serialKeyData.order_id ?? "Generic ID") + " - " + serial,
-      auth_expire: createSubscriptionTime,
+      note: newUserNote,
+      auth_expire: createSubscriptionTime
     });
 
     timeToBeAdded = createSubscriptionTime;
@@ -203,66 +212,110 @@ export async function RedeemKey(serial: string, user_id: string) {
       {
         auth_expire: timeToBeAdded.toString(),
         discord_id: user_id,
-        status: lrmUserFound ? lrmUserData.users[0].status : "reset",
-        banned: lrmUserFound ? lrmUserData.users[0].banned : 0,
+        status: lrmUserFound ? currentUserLrmData.status : "reset",
+        banned: lrmUserFound ? currentUserLrmData.banned : 0,
+        note: newUserNote
       },
     ],
   };
 
-  //This will not use luarmor to syncronize since we're passing the essential data directly
+  // This will not use luarmor to syncronize since we're passing the essential data directly
   const sync_result = await SyncSingleLuarmorUserByLRMSerial(
     luarmorSerialKey,
     false,
     user_data
   );
 
-  const order_id = (serialKeyData.order_id as string).toLowerCase();
+  const order_id = (serialKeyData.order_id as string);
+  const lowercase_order_id = order_id.toLowerCase();
+
+  const fieldsObject = [
+    {
+      name: "mspaint serial",
+      value: `||${serial}||`,
+      inline: true,
+    },
+    {
+      name: "Order ID",
+      value: `||${order_id}||`,
+      inline: true,
+    },
+    {
+      name: `Key duration: ${validFor ?? "Lifetime"}`,
+      value: `Claimed at: <t:${claimedAtUnixtimestamp}:d><t:${claimedAtUnixtimestamp}:T>`,
+      inline: true,
+    },
+
+    {
+      name: "Discord",
+      value: `<@${user_id}> (${user_id})`,
+      inline: true,
+    },
+    {
+      name: "Luarmor Serial",
+      value: `||${luarmorSerialKey}||`,
+      inline: true,
+    },
+    {
+      name: "Had Key System Key?",
+      value: `${isCheckpointKey}`,
+      inline: true
+    },
+
+    {
+      name: "Banned?",
+      value: `${lrmUserFound ? currentUserLrmData.banned.toString() : "0"}`,
+      inline: false
+    },
+    {
+      name: "Status",
+      value: `${lrmUserFound ? currentUserLrmData.status.toString() : "reset"}`,
+      inline: false
+    }
+  ]
+
+  let resellerFound = false;
+  let resellerData = null;
+
+  // Check if order_id matches any known reseller
   for (const [key, data] of Object.entries(RESELLER_DATA)) {
-    if (order_id.includes(key)) {
-      await fetch(data.webhook, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: null,
-          embeds: [
-            {
-              title: `${data.name} - mspaint key purchased`,
-              description: `a key was purchased & redeemed via the ${data.name} reseller.`,
-              color: 5814783,
-              fields: [
-                {
-                  name: "mspaint serial",
-                  value: `||${serial}||`,
-                  inline: true,
-                },
-                {
-                  name: "Order ID",
-                  value: `||${rows[0].order_id}||`,
-                  inline: true,
-                },
-                {
-                  name: "Discord",
-                  value: `<@${user_id}> (${user_id})`,
-                  inline: true,
-                },
-                {
-                  name: "Luarmor Serial",
-                  value: `||${luarmorSerialKey}||`,
-                  inline: true,
-                },
-              ],
-            },
-          ],
-          attachments: [],
-        }),
-      });
+    if (lowercase_order_id.includes(key)) {
+      resellerFound = true;
+      resellerData = data;
       break;
     }
+  }
 
-    //If no reseller is found, must be a untracked reseller or from mspaint
-    await fetch(data.webhook, {
+  if (resellerFound && resellerData) {
+    let resellerWebhook = resellerData.webhook;
+    let webhookMissing = false;
+    if (resellerWebhook === null || resellerWebhook == "") {
+      resellerWebhook = RESELLER_DATA.mspaintcc.webhook;
+      webhookMissing = true;
+    }
+
+    // Send webhook for tracked reseller
+    await fetch(resellerWebhook, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: webhookMissing ? "@everyone Webhook for this reseller is missing, please add it to the .env file." : null,
+        embeds: [
+          {
+            title: `${resellerData.name} - mspaint key redeemed!`,
+            description: `A key was purchased & redeemed via the __${resellerData.name}__ reseller.`,
+            color: 5814783,
+            fields: fieldsObject
+          },
+        ],
+        attachments: [],
+      }),
+    });
+  } else {
+    // If no reseller is found, must be an untracked reseller or from mspaint
+    await fetch(RESELLER_DATA.mspaintcc.webhook, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -271,42 +324,15 @@ export async function RedeemKey(serial: string, user_id: string) {
         content: null,
         embeds: [
           {
-            title: `${data.name} - key redeemed!`,
-            description: `Via the official __${data.name}__ shop or untracked reseller.`,
+            title: "mspaint - key redeemed!",
+            description: "A key was purchased & redeemed via the official __mspaint__ shop or untracked reseller.",
             color: 55295,
-            fields: [
-              {
-                name: "mspaint serial",
-                value: `||${serial}||`,
-                inline: true,
-              },
-              {
-                name: "Order ID",
-                value: `||${order_id}||`,
-                inline: true,
-              },
-              {
-                name: "Discord",
-                value: `<@${user_id}> (${user_id})`,
-                inline: true,
-              },
-              {
-                name: "Luarmor Serial",
-                value: `||${luarmorSerialKey}||`,
-                inline: true,
-              },
-              {
-                name: `Key duration: ${validFor ?? "Lifetime"}`,
-                value: `Claimed at: <t:${claimedAtUnixtimestamp}:d><t:${claimedAtUnixtimestamp}:T>`,
-                inline: true,
-              },
-            ],
+            fields: fieldsObject
           },
         ],
         attachments: [],
       }),
     });
-    break;
   }
 
   const operation = lrmUserFound ? "updated" : "created";

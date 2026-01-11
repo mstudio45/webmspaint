@@ -317,8 +317,7 @@ export default function CreateSerialKey() {
                   selected:
                     | "none"
                     | "bloxproducts"
-                    | "robloxcheatz"
-                    | "lick"
+                    | "yesucc"
                     | "outlaw"
                     | "giveaway"
                     | "replacement"
@@ -335,12 +334,8 @@ export default function CreateSerialKey() {
                     setOrderID(`Bloxproducts - {UUID}`);
                   }
 
-                  else if (selected === "robloxcheatz") {
-                    setOrderID(`RobloxCheatz - {UUID}`);
-                  }
-
-                  else if (selected === "lick") {
-                    setOrderID(`Lick - {UUID}`);
+                  else if (selected === "yesucc") {
+                    setOrderID(`YesuCC - {UUID}`);
                   }
 
                   else if (selected === "outlaw") {
@@ -362,8 +357,7 @@ export default function CreateSerialKey() {
                   <SelectGroup>
                     <SelectLabel>Reseller</SelectLabel>
                     <SelectItem value="bloxproducts">Bloxproducts</SelectItem>
-                    <SelectItem value="robloxcheatz">Robloxcheatz</SelectItem>
-                    <SelectItem value="lick">Lick</SelectItem>
+                    <SelectItem value="yesucc">YesuCC</SelectItem>
                     <SelectItem value="outlaw">Outlaw</SelectItem>
                   </SelectGroup>
 
