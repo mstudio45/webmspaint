@@ -7,17 +7,19 @@ export async function userDiscordSignOut() {
 }
 
 const allowed_users = ["1177722124035706931", "389792019360514048", "1098248637789786165"];
-export async function isUserAllowedOnDashboard() {
-    const session = await auth();
+export async function isUserAllowedOnDashboard(custom_user_id?: string) {
+    let user_id = "1";
 
-    if (!session || !session.user) {
-        return false;
+    if (custom_user_id) {
+        user_id = custom_user_id;
+    } else {
+        const session = await auth();
+        if (!session || !session.user) {
+            return false;
+        }
+
+        user_id = session.user.id ?? "1";
     }
 
-    const user_id = session.user.id ?? "1"
-    if (!allowed_users.includes(user_id)) {
-        return false;
-    }
-
-    return true;
+    return allowed_users.includes(user_id);
 }

@@ -74,6 +74,7 @@ export type SerialDef = {
   expires_at: number | null;
   from_key_system?: boolean;
   is_post_banned?: boolean;
+  created_by: string;
 };
 
 const claimedAtFilter: FilterFn<SerialDef> = (row, columnId, filterValue) => {
@@ -131,6 +132,34 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
   }, [serialRefreshKey, sortOrder]);
 
   const columns: ColumnDef<SerialDef>[] = [
+    {
+      accessorKey: "created_by",
+      header: "Has Creator?",
+      cell: ({ row }) => {
+        if (syncingRows.has(row.original.serial)) {
+          return (
+            <div className="flex items-center">
+              <LoaderIcon className="h-4 w-4 animate-spin mr-2" />
+              Syncing...
+            </div>
+          );
+        }
+
+        const isEmpty = !row.original?.created_by || row.original?.created_by == null || row.original?.created_by == "";
+        return (
+          <div className="flex ml-4">
+            {
+              isEmpty ? (
+                <Badge className="justify-center" variant={"destructive"}>❌</Badge>
+              ) : (
+                <Badge className="justify-center" variant={"outline"}>✔</Badge>
+              )
+            }
+          </div>
+        );
+      },
+    },
+    
     {
       accessorKey: "claimed_at",
       header: () => <p className="flex ml-4">Status</p>,
@@ -341,12 +370,22 @@ export function SerialDataTable({ data }: DataTableProps<SerialDef>) {
             <DropdownMenuContent>
               <DropdownMenuItem
                 onClick={() => {
+                  navigator.clipboard.writeText(row.original.created_by ?? "???");
+                  toast.success("Creator copied to clipboard.");
+                }}
+              >
+                Copy Creator of Serial
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => {
                   navigator.clipboard.writeText(row.original.serial ?? "");
                   toast.success("Serial copied to clipboard.");
                 }}
               >
                 Copy Serial
               </DropdownMenuItem>
+
               {selectedSerial?.lrm_serial && (
                 <DropdownMenuItem
                   onClick={() => {

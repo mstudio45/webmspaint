@@ -33,7 +33,7 @@ async function getIp(headersList: Headers, request: NextRequest) {
 
     if (forwarded) return forwarded.split(",")[0].trim();
     if (realIp) return realIp.trim();
-    
+
     return undefined;
 }
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
             default:
                 return new Response(
                     `An error occured while generating your key\n` +
-                    `(Error: Invalid Slug)\n` +                
+                    `(Error: Invalid Slug)\n` +
                     `Please contact please contact support (https://www.mspaint.cc/support)\n` +
                     `or join our discord server here: https://www.mspaint.cc/discord/`
                 );
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         for (let i = 0; i < data.quantity; i++) {
             const serial = createSerial();
 
-            await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to) VALUES (${serial}, ${data.invoice.id}, NULL, ${validFor}, NULL)`;
+            await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to, created_by) VALUES (${serial}, ${data.invoice.id}, NULL, ${validFor}, NULL, SellApp)`;
             createdSerials.push(serial);
         }
 
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
             `Make sure to keep this link safe, as it is the only way to redeem your key(s). You can redeem your serial(s) at:\n\n` +
             `https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(createdSerials.join(","))}`
         );
-        
+
         /*const serialsFormatted = createdSerials
             .map(serial => `https://www.mspaint.cc/purchase/completed?serial=${encodeURIComponent(serial)}`)
             .join(" | ");
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     const request_ip = await getIp(request.headers, request);
-    
+
     if (isDev ? false : !request_ip) {
         return NextResponse.json({
             status: 400,
@@ -157,9 +157,10 @@ export async function GET(request: NextRequest) {
         order_id      TEXT       NOT NULL,
         claimed_at    TIMESTAMPTZ NULL,
         key_duration  TEXT       NULL,
-        linked_to     TEXT       NULL
+        linked_to     TEXT       NULL,
+        created_by    TEXT       NULL
     );`;
-    
+
     const { rows } = await sql`SELECT * FROM mspaint_keys_new WHERE order_id = ${order_id};`
 
     let claimedCount = 0;

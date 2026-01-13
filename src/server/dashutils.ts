@@ -8,6 +8,7 @@ import {
   HTTP_METHOD,
 } from "@/lib/utils";
 import { rateLimitService } from "./ratelimit";
+import { auth } from "@/auth";
 
 const LRM_Headers = {
   Authorization: `Bearer ${process.env.LRM_PROXY_API_KEY}`,
@@ -51,7 +52,13 @@ export async function GenerateSerial(
   amount: number,
   durationMinutes: number | null = null
 ) {
-  const allowed = await isUserAllowedOnDashboard();
+  const session = await auth();
+  if (!session || !session.user) {
+    return false;
+  }
+
+  const user_id = session.user.id ?? "1"
+  const allowed = await isUserAllowedOnDashboard(user_id);
   if (!allowed) return { status: 403, error: "nah" };
 
   let actualInvoiceId = invoiceID;
@@ -86,7 +93,7 @@ export async function GenerateSerial(
 
     const validFor = durationMinutes == 0 ? "1 second" : createInterval(durationMinutes);
 
-    await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to) VALUES (${serial}, ${invoiceIDToInsert}, NULL, ${validFor}, NULL)`;
+    await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to, created_by) VALUES (${serial}, ${invoiceIDToInsert}, NULL, ${validFor}, NULL, ${user_id})`;
     serials.push(serial);
   }
 
