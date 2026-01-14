@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         for (let i = 0; i < data.quantity; i++) {
             const serial = createSerial();
 
-            await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to, created_by) VALUES (${serial}, ${data.invoice.id}, NULL, ${validFor}, NULL, SellApp)`;
+            await sql`INSERT INTO mspaint_keys_new (serial, order_id, claimed_at, key_duration, linked_to) VALUES (${serial}, ${data.invoice.id}, NULL, ${validFor}, NULL)`;
             createdSerials.push(serial);
         }
 
