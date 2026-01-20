@@ -21,7 +21,12 @@ export async function GET(request: NextRequest, slug: { params: Promise<{ discor
             : "Discord API error";
         return NextResponse.json(
             { error: errorMessage },
-            { status: response.status }
+            { 
+                status: response.status,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                }
+            }
         );
     }
 
@@ -29,7 +34,12 @@ export async function GET(request: NextRequest, slug: { params: Promise<{ discor
     if (!data.id) { // validate if the discord id exists in the response
         return NextResponse.json(
             { error: "Invalid Discord API response" },
-            { status: 502 }
+            { 
+                status: 502,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                }
+            }
         );
     }
 
@@ -48,7 +58,8 @@ export async function GET(request: NextRequest, slug: { params: Promise<{ discor
     }, {
         status: response.status,
         headers: {
-            "Content-Type": "application/json; charset=utf-8"
+            "Content-Type": "application/json; charset=utf-8",
+            "Access-Control-Allow-Origin": "*",
         }
     });
 }
