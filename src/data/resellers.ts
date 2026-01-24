@@ -18,5 +18,10 @@ export const RESELLER_DATA = {
       name: "Outlaw",
       webhook: process.env.OUTLAW_WEBHOOK!,
       discord: "https://discord.gg/getoutlaw"
+    },
+    bennnyr: {
+      name: "bennnyr",
+      webhook: process.env.BENNNYR_WEBHOOK!,
+      discord: "https://bennnyr.mysellauth.com/"
     }
 };
