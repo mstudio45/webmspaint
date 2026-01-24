@@ -22,6 +22,6 @@ export const RESELLER_DATA = {
     bennnyr: {
       name: "bennnyr",
       webhook: process.env.BENNNYR_WEBHOOK!,
-      discord: "https://bennnyr.mysellauth.com/"
+      discord: "https://bennnyr.shop/"
     }
 };

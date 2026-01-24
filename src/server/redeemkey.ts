@@ -289,7 +289,7 @@ export async function RedeemKey(serial: string, user_id: string) {
   if (resellerFound && resellerData) {
     let resellerWebhook = resellerData.webhook;
     let webhookMissing = false;
-    if (resellerWebhook === null || resellerWebhook == "") {
+    if (resellerWebhook === null || resellerWebhook == "" || resellerWebhook === undefined) {
       resellerWebhook = RESELLER_DATA.mspaintcc.webhook;
       webhookMissing = true;
     }
