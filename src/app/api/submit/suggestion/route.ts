@@ -109,15 +109,19 @@ export async function POST(request: NextRequest) {
     if (isPostBanned || isBanned) return NextResponse.json({ status: "error", error: [{ message: "Banned" }] }, { status: 401 });
 
     // check for mspaint bot //
-    const response = await fetch(
-        "https://irc.mspaint.cc/v1/users/1300942082076053554",
-        { cache: "force-cache", next: { revalidate: 120 } } // 2 minutes
-    );
+    try {
+      const response = await fetch(
+          "https://irc.mspaint.cc/v1/users/1300942082076053554",
+          { cache: "force-cache", next: { revalidate: 30 } }
+      );
 
-    if (!response.ok) return NextResponse.json({ status: "error", error: [{ message: "Could not verify if the mspaint bot is online, please try again later." }] }, { status: 400 });
-
-    const botInformation = await response.json();
-    if (botInformation?.data?.discord_status !== "online") return NextResponse.json({ status: "error", error: [{ message: "The mspaint bot is offline, please try again later." }] }, { status: 400 });
+      if (!response.ok) return NextResponse.json({ status: "error", error: [{ message: "Could not verify if the mspaint bot is online, please try again later." }] }, { status: 400 });
+      
+      const botInformation = await response.json();
+      if (botInformation?.data?.discord_status !== "online") return NextResponse.json({ status: "error", error: [{ message: "The mspaint bot is offline, please try again later." }] }, { status: 400 });
+    } catch (error) {
+      return NextResponse.json({ status: "error", error: [{ message: "Could not verify if the mspaint bot is online, please try again later." }] }, { status: 400 });
+    }
 
     // send suggestion data //
     const suggestionId = generateId();
