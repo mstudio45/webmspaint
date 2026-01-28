@@ -1,7 +1,7 @@
 "use server";
 
 import { sql } from "@vercel/postgres";
-import { RESELLER_DATA } from "@/data/resellers";
+import { RESELLER_DATA, RESELLER_WEBHOOK } from "@/data/resellers";
 import { HTTP_METHOD, parseIntervalToSec } from "@/lib/utils";
 import {
   RequestLuarmorUsersEndpoint,
@@ -287,21 +287,16 @@ export async function RedeemKey(serial: string, user_id: string) {
   }
 
   if (resellerFound && resellerData) {
-    let resellerWebhook = resellerData.webhook;
-    let webhookMissing = false;
-    if (resellerWebhook === null || resellerWebhook == "" || resellerWebhook === undefined) {
-      resellerWebhook = RESELLER_DATA.mspaintcc.webhook;
-      webhookMissing = true;
-    }
-
     // Send webhook for tracked reseller
-    await fetch(resellerWebhook, {
+    await fetch(RESELLER_WEBHOOK, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        content: webhookMissing ? "@everyone Webhook for this reseller is missing, please add it to the .env file." : null,
+        content: null,
+        username: resellerData.name,
+        avatar_url: resellerData.avatar ?? "",
         embeds: [
           {
             title: `${resellerData.name} - mspaint key redeemed!`,
@@ -315,7 +310,7 @@ export async function RedeemKey(serial: string, user_id: string) {
     });
   } else {
     // If no reseller is found, must be an untracked reseller or from mspaint
-    await fetch(RESELLER_DATA.mspaintcc.webhook, {
+    await fetch(RESELLER_WEBHOOK, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

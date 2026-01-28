@@ -1,27 +1,28 @@
+export const RESELLER_WEBHOOK = process.env.MSPAINT_WEBHOOK!;
 export const RESELLER_DATA = {
     mspaintcc: {
       name: "mspaint",
-      webhook: process.env.MSPAINT_WEBHOOK!,
+      avatar: "https://www.mspaint.cc/icon.png",
       discord: "https://mspaint.cc/discord"
     },
     bloxproducts: {
-      name: "Bloxproducts",
-      webhook: process.env.BLOXPRODUCTS_WEBHOOK!,
+      name: "BloxProducts",
+      avatar: "https://bloxproducts.com/favicon.png",
       discord: "https://bloxproducts.com/discord",
     },
     yesucc: {
       name: "YesuCC",
-      webhook: process.env.YESUCC_WEBHOOK!,
+      avatar: "",
       discord: "https://shop.yesucc.cc/",
     },
     outlaw: {
       name: "Outlaw",
-      webhook: process.env.OUTLAW_WEBHOOK!,
+      avatar: "https://www.google.com/s2/favicons?sz=64&domain=getoutlaw.net",
       discord: "https://discord.gg/getoutlaw"
     },
     bennnyr: {
       name: "bennnyr",
-      webhook: process.env.BENNNYR_WEBHOOK!,
+      avatar: "https://bennnyr.shop/assets/bennnyrlogo.jpg",
       discord: "https://bennnyr.shop/"
     }
 };

@@ -332,7 +332,7 @@ export default function CreateSerialKey() {
                   }
 
                   else if (selected === "bloxproducts") {
-                    setOrderID(`Bloxproducts - {UUID}`);
+                    setOrderID(`BloxProducts - {UUID}`);
                   }
 
                   else if (selected === "yesucc") {
@@ -361,7 +361,7 @@ export default function CreateSerialKey() {
 
                   <SelectGroup>
                     <SelectLabel>Reseller</SelectLabel>
-                    <SelectItem value="bloxproducts">Bloxproducts</SelectItem>
+                    <SelectItem value="bloxproducts">BloxProducts</SelectItem>
                     <SelectItem value="yesucc">YesuCC</SelectItem>
                     <SelectItem value="outlaw">Outlaw</SelectItem>
                     <SelectItem value="bennnyr">bennnyr</SelectItem>
