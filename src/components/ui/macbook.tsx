@@ -129,16 +129,23 @@ export const Lid = memo(({
   src?: string;
   lid?: string | ReactNode;
 }) => {
-  const memoizedImage = useMemo(() => (
-    <Image
-      src={src as string}
-      alt="mspaint"
-      fill
-      className="object-fit absolute rounded-lg inset-0 h-full w-full"
-      decoding="async"
-      priority
-    />
-  ), [src]);
+  const memoizedImage = useMemo(() => {
+    if (!src) return null;
+
+    const isRemoteImage = src.startsWith("http://") || src.startsWith("https://");
+
+    return (
+      <Image
+        src={src}
+        alt="mspaint"
+        fill
+        className="object-fit absolute rounded-lg inset-0 h-full w-full"
+        decoding="async"
+        priority
+        unoptimized={isRemoteImage}
+      />
+    );
+  }, [src]);
 
   const memoizedMotionChildren = useMemo(() => (
     <>

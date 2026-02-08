@@ -31,50 +31,41 @@ import Executor from "@/components/executor";
 import { Features } from "@/components/features";
 import DynamicShopButton from "@/components/buy-mspaint";
 import { gamesList } from "@/data/games";
-import { auth } from "@/auth";
 import {
   ScrollVelocityContainer,
   ScrollVelocityRow,
 } from "@/components/magicui/scroll-based-velocity";
 import { UIStateProvider } from "@/components/obsidian/UIStateProvider";
 
+export const dynamic = "force-static";
+
 export default async function Home() {
-  const session = await auth();
-  const noAccount = !session || !session.user || !session.user.id;
+  const guildPromise = fetch(
+    "https://discord.com/api/v9/invites/mspaint?with_counts=true&with_expiration=true",
+    { cache: "force-cache", next: { revalidate: 300 } }
+  )
+    .then((response) => response.json())
+    .catch(() => ({ approximate_member_count: 20000 }));
 
-  // discord
-  let gamesStatusData, languageData, guildData;
-  try {
-    const guildResponse = await fetch(
-      "https://discord.com/api/v9/invites/mspaint?with_counts=true&with_expiration=true",
-      { cache: "force-cache", next: { revalidate: 300 } }
-    ); // 5 minutes
-    guildData = await guildResponse.json();
-  } catch {
-    guildData = { approximate_member_count: 20000 };
-  }
+  const languagesPromise = fetch(
+    "https://raw.githubusercontent.com/mspaint-cc/translations/refs/heads/main/Languages.json",
+    { cache: "force-cache", next: { revalidate: 300 } }
+  )
+    .then((response) => response.json())
+    .catch(() => ({ en: {} }));
 
-  // languages
-  try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/mspaint-cc/translations/refs/heads/main/Languages.json",
-      { cache: "force-cache", next: { revalidate: 300 } }
-    ); // 5 minutes
-    languageData = await response.json();
-  } catch {
-    languageData = { ["en"]: {} };
-  }
+  const gameStatusPromise = fetch(
+    "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/status.json",
+    { cache: "force-cache", next: { revalidate: 60 } }
+  )
+    .then((response) => response.json())
+    .catch(() => ({}));
 
-  // games data
-  try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/mspaint-cc/assets/refs/heads/main/status.json",
-      { cache: "force-cache", next: { revalidate: 60 } }
-    ); // 1 minute
-    gamesStatusData = await response.json();
-  } catch {
-    gamesStatusData = {};
-  }
+  const [guildData, languageData, gamesStatusData] = await Promise.all([
+    guildPromise,
+    languagesPromise,
+    gameStatusPromise,
+  ]);
 
   return (
     <>
@@ -111,10 +102,10 @@ export default async function Home() {
 
           <NavbarItem>
             <Link
-              href={noAccount ? "/sign-in" : "/subscription-dashboard"}
+              href="/subscription-dashboard"
               className="relative text-foreground transition-colors hover:text-neutral-200 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full"
             >
-              {noAccount ? "Sign In" : "Dashboard"}
+              Dashboard
             </Link>
           </NavbarItem>
         </NavbarContent>

@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "./auth";
 
-export default async function middleware(req: NextRequest) {
-  await auth();
-
+export default function middleware(req: NextRequest) {
   // Registry redirection
   if (
     req.nextUrl.pathname.startsWith("/r/") &&
@@ -11,7 +8,12 @@ export default async function middleware(req: NextRequest) {
   ) {
     const url = req.nextUrl.clone();
     url.pathname = `${url.pathname}.json`;
-    return NextResponse.redirect(url);
+    return NextResponse.rewrite(url);
+  }
+
+  const acceptHeader = req.headers.get("accept") || "";
+  if (!acceptHeader.includes("text/html")) {
+    return NextResponse.next();
   }
 
   // response
@@ -42,6 +44,6 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!icons|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.[^/]+$).*)",
   ],
 };

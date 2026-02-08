@@ -4,10 +4,12 @@ import { BlurFade } from "./magicui/blur-fade";
 import { cn } from "@/lib/utils";
 
 export default function Executor({ url, name, image, isWidth }: { url: string, name: string, image: string, isWidth?: boolean }) {
+    const isRemoteImage = image.startsWith("http://") || image.startsWith("https://");
+
     return (
     <Link href={url} target="_blank">
         <BlurFade delay={0.2 + (3 * 0.05)} className="flex flex-row items-center justify-center gap-1 max-md:gap-3" inView>
-            <Image alt={name} src={image} width={isWidth == true ? 80 : 30} height={30} className={cn(`max-md:w-${isWidth == true ? "18" : "14"} max-md:h-14 object-contain`)} loading="lazy" />
+            <Image alt={name} src={image} width={isWidth == true ? 80 : 30} height={30} className={cn(`max-md:w-${isWidth == true ? "18" : "14"} max-md:h-14 object-contain`)} unoptimized={isRemoteImage} loading="lazy" />
             <span className="text-lg font-bold max-md:text-3xl">{name}</span>
         </BlurFade>
     </Link>);
