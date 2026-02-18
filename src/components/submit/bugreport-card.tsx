@@ -38,6 +38,8 @@ export default function BugreportCard({
     const [game, setGame] = React.useState("");
     const [executor, setExecutor] = React.useState("");
 
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+
     const titleRef = useRef<HTMLInputElement>(null);
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
     const consoleImageRef = useRef<HTMLInputElement>(null);
@@ -184,11 +186,14 @@ export default function BugreportCard({
 
                     <hr />
 
-                    <Button disabled={isDisabled} variant={"default"} onClick={(e) => {
+                    <Button disabled={isDisabled || isSubmitting} variant={"default"} onClick={(e) => {
                         e.preventDefault();
 
                         if (!isSubscriptionActive) return;
                         if (isBanned || isUnlink) return;
+                        if (isSubmitting) return;
+
+                        setIsSubmitting(true);
                         
                         toast.promise(
                             (async () => {
@@ -213,12 +218,14 @@ export default function BugreportCard({
 
                                 const data = await response.json();
                                 if (!response.ok) {
+                                    setTimeout(() => { setIsSubmitting(false); }, 500);
                                     throw new Error(
                                         (data.error && data.error.length > 0) ? data.error[0]?.message : "Submit failed."
                                     );
                                 }
 
                                 if (data.success === false) {
+                                    setTimeout(() => { setIsSubmitting(false); }, 500);
                                     throw new Error(
                                         data.message ? data.message : "Submit failed."
                                     );
@@ -229,9 +236,7 @@ export default function BugreportCard({
                             {
                                 loading: "Submitting...",
                                 success: (data) => {
-                                    setTimeout(() => {
-                                        window.location.reload()
-                                    }, 2500);
+                                    setTimeout(() => { window.location.reload() }, 3500);
 
                                     return (
                                         data.message || "Bug Report has been submitted successfully!"

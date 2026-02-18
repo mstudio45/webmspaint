@@ -32,6 +32,8 @@ export default function SuggestionCard({
     const [isDisabled, setIsDisabled] = useState(true);
     const [game, setGame] = React.useState("");
 
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+
     const titleRef = useRef<HTMLInputElement>(null);
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
@@ -119,11 +121,14 @@ export default function SuggestionCard({
 
                     <hr />
 
-                    <Button disabled={isDisabled} variant={"default"} onClick={(e) => {
+                    <Button disabled={isDisabled || isSubmitting} variant={"default"} onClick={(e) => {
                         e.preventDefault();
 
                         if (!isSubscriptionActive) return;
                         if (isBanned || isUnlink) return;
+                        if (isSubmitting) return;
+
+                        setIsSubmitting(true);
                         
                         toast.promise(
                             (async () => {
@@ -144,12 +149,14 @@ export default function SuggestionCard({
 
                                 const data = await response.json();
                                 if (!response.ok) {
+                                    setTimeout(() => { setIsSubmitting(false); }, 500);
                                     throw new Error(
                                         (data.error && data.error.length > 0) ? data.error[0]?.message : "Submit failed."
                                     );
                                 }
 
                                 if (data.success === false) {
+                                    setTimeout(() => { setIsSubmitting(false); }, 500);
                                     throw new Error(
                                         data.message ? data.message : "Submit failed."
                                     );
@@ -160,9 +167,7 @@ export default function SuggestionCard({
                             {
                                 loading: "Submitting...",
                                 success: (data) => {
-                                    setTimeout(() => {
-                                        window.location.reload()
-                                    }, 2500);
+                                    setTimeout(() => { window.location.reload() }, 3500);
 
                                     return (
                                         data.message || "Suggestion has been submitted successfully!"

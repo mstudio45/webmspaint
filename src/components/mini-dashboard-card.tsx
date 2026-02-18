@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import {
   BugOffIcon,
+  CircleAlertIcon,
+  FileWarningIcon,
   LockKeyholeIcon,
   LockKeyholeOpenIcon,
   MailPlus,
@@ -147,6 +149,7 @@ export default function MiniDashboardCard({
 
   const discordName = session?.user?.name ?? "";
   const displayName = discordName.length > 16 ? discordName.slice(0, 13) + "..." : discordName;
+  const userId = session?.user?.id ?? "";
 
   return (
     <div className="w-full max-w-md mx-auto sm:mx-0 mt-6">
@@ -198,6 +201,7 @@ export default function MiniDashboardCard({
                 <p className="text-lg sm:text-xl font-semibold text-white text-center sm:text-left">
                   {displayName}
                 </p>
+                <p className="text-sm opacity-50">{userId}</p>
               </div>
 
               <div className={isMember ? "mb-5" : ""}>
@@ -262,6 +266,14 @@ export default function MiniDashboardCard({
                                   <AlertDialogDescription>
                                     Just click the copy button and paste it in
                                     your script executor.
+
+                                    <div className="flex flex-row align-center my-2 mb-0 px-5 py-4 overflow-hidden rounded-2xl flex gap-3 border border-yellow-900 bg-yellow-600/20">
+                                      <CircleAlertIcon className="w-4 flex-none size-5 text-yellow-300" />
+                                      <span className="text-sm prose min-w-0 w-fullent text-yellow-300">
+                                        <strong>Key sharing is not allowed!</strong><br />
+                                        While using mspaint you agree to our <a className="underline" href="https://www.mspaint.cc/tos" target="_blank">Terms Of Service</a>.
+                                      </span>
+                                    </div>
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
 
@@ -523,9 +535,7 @@ export default function MiniDashboardCard({
                       </div>
                     )}
 
-                    <div className="*:mt-3">
-                      {/* honestly, idc... */}
-
+                    <div className="*:mt-2">
                       {(!isBanned) && (
                         <>
                           {isLifetime ? (
