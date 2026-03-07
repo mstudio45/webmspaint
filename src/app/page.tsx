@@ -293,14 +293,6 @@ export default async function Home() {
               />
 
               <GameCard
-                title={"Forsaken"}
-                mappingName={"Forsaken - Forsaken"}
-                image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsABgYQjlAKU9TJFX7q3z8ExZVAWyQeLOfamDgu`}
-                placeId={18687417158}
-                gamesStatusData={gamesStatusData}
-              />
-
-              <GameCard
                 title={"99 Nights In The Forest"}
                 mappingName={"DOORS - The Hotel"}
                 image={`https://ob4fgkbb3w.ufs.sh/f/q5sBExIITNsADE6fvhZdFkZ8BrWt7UD6Chu0vipAY5EmbNLK`}

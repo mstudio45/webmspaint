@@ -190,11 +190,6 @@ export const MenuMapping = {
     DataURL: GetUIDataURL("99nightsintheforest"),
   }),
 
-  ...SetupGameMapping("Forsaken", {
-    Game: "Forsaken [BETA]",
-    DataURL: GetUIDataURL("forsaken"),
-  }),
-
   ...SetupGameMapping("Universal", {
     Game: "Universal",
     DataURL: GetUIDataURL("universal"),
