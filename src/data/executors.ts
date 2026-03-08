@@ -1,17 +1,28 @@
 export const executorsList = [
+    // Windows
+    "Synapse Z",
     "Seliware",
-    "Volt",
     "Potassium",
     "Volcano",
     "ChocoSploit",
-    "bunni.lol",
+
     "Velocity",
+    "bunni.lol",
     "Wave",
+
     "Solara",
-    "Cryptic",
-    "Delta",
+
+    // Android
+    "Delta (Android)",
+    "Cryptic (Android)",
+
+    // iOS
+    "Delta (iOS)",
+
+    // MacOS
     "MacSploit",
     "Hydrogen",
-    "Xeno",
+
+    // Other
     "Other Executor"
-]
+];

@@ -10,7 +10,9 @@ const schema = z.object({
     gameid: z.number(),
 
     loading: z.boolean().nullable(),
-    failed: z.boolean().nullable()
+    failed: z.boolean().nullable(),
+
+    loadingtime: z.number().nullable()
 })
 
 export async function POST(req: NextRequest) {

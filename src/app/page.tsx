@@ -207,11 +207,19 @@ export default async function Home() {
 
                 <div className="flex flex-row items-center justify-center mt-5 gap-8 max-md:flex-col">
                   <Executor
+                    name={"Synapse Z"}
+                    image={
+                      "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAstrcP1OfyiFW9CYJnxZHQ6R5wvaPXUIVc0Orp"
+                    }
+                    url={"#"}
+                  />
+
+                  <Executor
                     name={"Seliware"}
                     image={
                       "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAs2M1WsFKsE4uqeKTGPFHJZhdvYVzSAOgb9aty"
                     }
-                    url={"https://seliware.com"}
+                    url={"#"}
                   />
 
                   <Executor
@@ -219,14 +227,15 @@ export default async function Home() {
                     image={
                       "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAsKTjfEJrg4CbGHLXhvIFxQV5pY6qirBw2Ju7n"
                     }
-                    url={"https://getsolara.dev"}
+                    url={"#"}
                   />
+
                   <Executor
                     name={"Delta"}
                     image={
                       "https://q2p0njok3b.ufs.sh/f/Z155p1jPvLAslPmgsgFtT6a830HkYDKeuAh9RwMGsqd24CQZ"
                     }
-                    url={"https://deltaexploits.gg"}
+                    url={"#"}
                   />
                 </div>
 
